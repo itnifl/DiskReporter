@@ -148,14 +148,14 @@ namespace DiskReporter {
         public double PCT_UTIL { get; set; }
         public DateTime LAST_BACKUP_END { get; set; }
     }
-    public class TsmMethods : IComPlugin {
+    public class TsmPlugin : IComPlugin {
         public string PluginName { get; set; }
         /*  Requires TSM Admin Client
          *    for full functionality,
          *      works for testing in debug mode.
          */
 
-        public TsmMethods(string pluginName) {
+        public TsmPlugin(string pluginName) {
             this.PluginName = pluginName;
         }
         public IComPlugin GetPlugin() {
@@ -277,6 +277,22 @@ namespace DiskReporter {
             writer.Flush();
             stream.Position = 0;
             return stream;
+        }
+        public bool CheckPrerequisites() {
+            bool allOK = true;
+            if (Environment.OSVersion.Platform == PlatformID.Unix) {
+                var sBinPath = @"/opt/tivoli/tsm/client/ba/bin";
+                var sDsmAdmc = Path.Combine(sBinPath, "dsmadmc");
+                if (!File.Exists(sDsmAdmc))
+                    allOK = false;
+            } else {
+                var prod = Kraggs.TSM.Utils.Win32.clsTSMRegistry.GetProductByName("TSM Administrative Client");
+                var sBinPath = prod.Path;
+                var sDsmAdmc = Path.Combine(sBinPath, "dsmadmc.exe");
+                if (!File.Exists(sDsmAdmc))
+                    allOK = false;
+            }
+            return allOK;
         }
     }
 }

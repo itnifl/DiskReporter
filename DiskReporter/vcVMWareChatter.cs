@@ -6,11 +6,13 @@ using System.Collections.Specialized;
 using VMware.Vim;
 using DiskReporter;
 
+/*  Requires namespace VMware.Vim
+ *  Requires VMware.Vim.dll
+ *  Requires VMware.VimAutomation.Logging.SoapInterceptor.dll
+ */
 namespace VMWareChatter {
 	public class VCenterCommunicator {
 		VimClient vcli = new VimClient();
-		ServiceContent vcon;
-		UserSession vus;
 	
         /// <summary>
         ///  Fetches all vmware guests, optionally filtered.
@@ -127,9 +129,11 @@ namespace VMWareChatter {
 				};
 			} else {
 				//Fetch information and collect them in a representative object:
-				vcon = vcli.Connect("https://" + hostName + "/sdk");
+                //ServiceContent vcon =
+                vcli.Connect("https://" + hostName + "/sdk");
 				if (!String.IsNullOrEmpty(domain)) userName = domain + "\\" + userName;
-				UserSession vus = vcli.Login(userName, password);
+				//UserSession vus = 
+                vcli.Login(userName, password);
 				var filter = new NameValueCollection();
 				filter.Add("name", guestNameFilter);
 				IList<EntityViewBase> vms = vcli.FindEntityViews(typeof(VirtualMachine), null, filter, null);

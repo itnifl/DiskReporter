@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using DiskReporter.PluginContracts;
 
 namespace DiskReporter {
@@ -42,9 +43,51 @@ namespace DiskReporter {
         /// <summary>
         /// Loads all plugins that are defined in the method below
         /// </summary>
-        private void LoadAllPlugins() {
-            this.RegisterPlugin(new VmMethods("VMware"));
-            this.RegisterPlugin(new TsmMethods("TSM"));
+        public void LoadAllPlugins() {
+            this.RegisterPlugin(new VmPlugin("VMware"));
+            this.RegisterPlugin(new TsmPlugin("TSM"));
+        }
+        /// <summary>
+        /// Remove plugin from list of plugins by name
+        /// </summary>
+        /// <param name="pluginName">The plugin name of the plugin that we want to remove</param>
+        public bool RemovePlugin(string pluginName) {
+            var item = ComPlugins.SingleOrDefault(x => x.PluginName == pluginName);
+            if (item != null) {
+                ComPlugins.Remove(item);
+                return true;
+            }
+            return false;
+        }
+        /// <summary>
+        /// Remove plugin from list of reference to plugin
+        /// </summary>
+        /// <param name="plugin">The plugin that implements IComPlugin we want to remove</param>
+        public void RemovePlugin(IComPlugin plugin) {
+            ComPlugins.Remove(plugin);
+        }
+        /// <summary>
+        /// Returns all names of all plugins as a string array 
+        /// </summary>
+        public string[] GetAllPluginNames() {
+            return ComPlugins.Select(x => x.PluginName).ToArray();
+        }
+        /// <summary>
+        /// Returns all names of all plugins as a string array 
+        /// </summary>
+        public Tuple<bool, string[]> VerifyAllRegisteredPlugins() {
+            List<string> failures = new List<string>();
+            bool allOK = false;
+            foreach(IComPlugin plugin in ComPlugins) {
+                if(!plugin.CheckPrerequisites()) {
+                    failures.Add("Warning: " + plugin.PluginName + " failed its prerequisites check.");
+                }
+            }
+            if(failures.Count == 0) {
+                failures.Add("All plugins passed");
+                allOK = true;
+            }
+            return Tuple.Create(allOK, failures.ToArray());
         }
 	}
 }

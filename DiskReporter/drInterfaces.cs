@@ -34,7 +34,11 @@ namespace DiskReporter.PluginContracts {
 		List<IComPlugin> ComPlugins { get; set; }
 
         IEnumerator<IComPlugin> GetEnumerator();
+        Tuple<bool, string[]> VerifyAllRegisteredPlugins();
 		bool RegisterPlugin(IComPlugin plugin);
+        bool RemovePlugin(string pluginName);
+        string[] GetAllPluginNames();
+        void LoadAllPlugins();
 	}
     /// <summary>
     /// Represents a plugin
@@ -49,5 +53,6 @@ namespace DiskReporter.PluginContracts {
 		T1 GetAllNodesData<T1, T2>(String sourceConfigFileName, string nameFilter, out List<Exception> outExceptions) 
 			where T1 : IComNodeList<T2>, new()
 				where T2 : IComNode, new();
+        bool CheckPrerequisites();
 	}
 }

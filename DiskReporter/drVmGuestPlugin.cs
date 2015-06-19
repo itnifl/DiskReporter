@@ -106,10 +106,14 @@ namespace DiskReporter {
             return returnDisk;
         }
    }
-    class VmMethods : IComPlugin {
+    class VmPlugin : IComPlugin {
         public string PluginName { get; set;}
+        /*  Requires VMware.Vim.dll
+         *  Requires VMware.VimAutomation.Logging.SoapInterceptor.dll
+         *  These should be checked if are available either in local folder or in GAC
+         */
 
-		public VmMethods(string pluginName) {
+        public VmPlugin(string pluginName) {
 			this.PluginName = pluginName;
 		}
         /// <summary>
@@ -127,10 +131,6 @@ namespace DiskReporter {
 		public T1 GetAllNodesData<T1, T2>(string sourceConfigFileName, string nameFilter, out List<Exception> outExceptions) where T1 : IComNodeList<T2>, new() 
 			where T2 : IComNode, new()
 		{
-			/*
-			 * Since ourGuests will represent all our nodes, T2 gets to be obsolete in this implementation of the method.
-			 * This should to be fixed to have consistent code.
-			 * */
 			VCenterCommunicator vCom = new VCenterCommunicator ();
 			XmlReaderLocal vmConfigReader = new XmlReaderLocal(sourceConfigFileName);
 	     	List<Hashtable> hashtableList = vmConfigReader.ReadAllServers();
@@ -159,8 +159,24 @@ namespace DiskReporter {
 					});
 				}
 	     	}
-			outExceptions = loopExceptions;
-			return returnGuests;
+            outExceptions = loopExceptions;
+            return returnGuests;
 	    }
+        public bool CheckPrerequisites() {
+            bool allOK = true;
+            string currentDirectory = System.IO.Directory.GetCurrentDirectory();
+
+            if (!System.Reflection.Assembly.LoadFrom("VMware.Vim.dll").GlobalAssemblyCache) { // not in gac
+                if (!System.IO.File.Exists(currentDirectory + System.IO.Path.VolumeSeparatorChar + "VMware.Vim.dll")) {
+                    allOK = false;
+                }
+            }
+            if (!System.Reflection.Assembly.LoadFrom("VMware.VimAutomation.Logging.SoapInterceptor.dll").GlobalAssemblyCache) { // not in gac
+                if (!System.IO.File.Exists(currentDirectory + System.IO.Path.VolumeSeparatorChar + "VMware.VimAutomation.Logging.SoapInterceptor.dll")) {
+                    allOK = false;
+                }
+            }
+            return allOK;
+        }
     }
 }

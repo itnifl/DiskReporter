@@ -43,7 +43,7 @@ namespace DiskReporter {
 			} else if (!String.IsNullOrEmpty(arguments["-mailReport"]) && !String.IsNullOrEmpty(arguments["-mailReport"])) {
 				string mailReceiver = MailValidator.IsValid(arguments["-mailReport"]) ? arguments["-mailReport"] : "";
 				if (!String.IsNullOrEmpty(mailReceiver)) {
-					runStatus = programFlow.mailReport(!String.IsNullOrEmpty(arguments["-tsm"]) ? configDirectory + "config_TSMServers.xml" : String.Empty,
+					runStatus = programFlow.MailReport(!String.IsNullOrEmpty(arguments["-tsm"]) ? configDirectory + "config_TSMServers.xml" : String.Empty,
 					                                   !String.IsNullOrEmpty(arguments["-vmware"]) ? configDirectory + "config_vCenterServer.xml" : String.Empty,
 					                                   mailReceiver);
 				} else {
@@ -51,7 +51,7 @@ namespace DiskReporter {
 				}
 			} else {
 				string serverName = !String.IsNullOrEmpty(arguments["-server"]) ? arguments["-server"] : String.Empty;
-				var result = programFlow.fetchAllNodeDataAsSeparatedDicts(
+				var result = programFlow.FetchAllNodeDataAsSeparatedDicts(
 					!String.IsNullOrEmpty(arguments["-tsm"]) ? configDirectory + "config_TSMServers.xml" : String.Empty,
 					!String.IsNullOrEmpty(arguments["-vmware"]) ? configDirectory + "config_vCenterServer.xml" : String.Empty, 
 					serverNameFilter: serverName);
@@ -72,7 +72,7 @@ namespace DiskReporter {
 						}
 					}
 					if(!String.IsNullOrEmpty(arguments ["-excel"]) && vmwareNodeDictionary.Count != 0) {
-						string excelDocFileName = programFlow.createExcelReport("Server Report VMWare", "VMWare", vmwareNodeDictionary);
+						string excelDocFileName = programFlow.CreateExcelReport("Server Report VMWare", "VMWare", vmwareNodeDictionary);
 						if(!String.IsNullOrEmpty(excelDocFileName)) Console.WriteLine("Wrote results to " + excelDocFileName);
 						else Console.WriteLine("Warning: looks like writing to Excel file did not succeed for VMWare nodes, please check the same folder as the executable.");
 					}
@@ -90,7 +90,7 @@ namespace DiskReporter {
 						}
 					}
 					if(!String.IsNullOrEmpty(arguments ["-excel"]) && tsmNodeDictionary.Count != 0 ) {
-						string excelDocFileName = programFlow.createExcelReport("Server Report TSM", "TSM", tsmNodeDictionary);
+						string excelDocFileName = programFlow.CreateExcelReport("Server Report TSM", "TSM", tsmNodeDictionary);
 						if(!String.IsNullOrEmpty(excelDocFileName)) Console.WriteLine("Wrote results to " + excelDocFileName);
 						else Console.WriteLine("Warning: looks like writing to Excel file for TSM nodes did not succeed, please check the same folder as the executable.");
 					}

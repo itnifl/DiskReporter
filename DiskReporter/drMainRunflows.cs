@@ -35,6 +35,14 @@ namespace DiskReporter {
             this.configDirectory = configDirectory;
             logFilename = ((FileStream)(log.BaseStream)).Name;
             this.ourCommunicationPlugins = new ComPluginList();
+            //Now we check if there are any prerequisites missing to our plugins and warn to error log and console if there is:
+            var result = this.ourCommunicationPlugins.VerifyAllRegisteredPlugins();
+            bool pluginStatus = result.Item1;
+            if(!pluginStatus) {
+                foreach (string error in (string[])result.Item2) {
+                    this.DisplayException(new Exception(error));
+                }
+            }
         }
         ~DiskReporterMainRunFlows() {         
             try {
@@ -82,7 +90,7 @@ namespace DiskReporter {
         /// <summary>
         ///  Displays error messages approriately
         /// </summary>
-        private void displayException(Exception ex) {
+        private void DisplayException(Exception ex) {
             log.WriteLine(DateTime.Now + " - Error: " + ex.ToString());
             if(console_present) Console.WriteLine("Error - see the logs for more information: " + ex.ToString().Substring(0, (ex.ToString().Length > 160 ? 160 : 40)));
         }
@@ -92,7 +100,7 @@ namespace DiskReporter {
         /// <param name="tsmServersConfig">String representing the name an relative location of xml configuration file</param>
         /// <param name="vCenterConfig">String representing the name an relative location of xml configuration file</param>
         /// <param name="serverNameFilter">Name of server to filter out from the result</param>
-        public Tuple<OrderedDictionary, OrderedDictionary> fetchAllNodeDataAsSeparatedDicts(string tsmServersConfig, string vCenterConfig, string serverNameFilter) {
+        public Tuple<OrderedDictionary, OrderedDictionary> FetchAllNodeDataAsSeparatedDicts(string tsmServersConfig, string vCenterConfig, string serverNameFilter) {
             OrderedDictionary vmwareNodeDictionary = new OrderedDictionary();
             OrderedDictionary tsmNodeDictionary = new OrderedDictionary();
             List<Exception> vmExceptions = new List<Exception>();
@@ -100,7 +108,7 @@ namespace DiskReporter {
             //We are not looking for anything in the vCenter if a configuration for the vCenter server is not specified:
             if (!String.IsNullOrEmpty (vCenterConfig)) {
             	try {
-            		VmMethods vMwarePlugin = (VmMethods)ourCommunicationPlugins.ComPlugins.Find(x => x.PluginName.ToUpper().Equals("VMWARE"));
+                    VmPlugin vMwarePlugin = (VmPlugin)ourCommunicationPlugins.ComPlugins.Find(x => x.PluginName.ToUpper().Equals("VMWARE"));
             	    VmGuests vmGuests = vMwarePlugin.GetAllNodesData<VmGuests, VmGuest>(vCenterConfig, serverNameFilter, out vmExceptions);
             		if (String.IsNullOrEmpty (serverNameFilter))
             			vmwareNodeDictionary.Add ("TotalCollectionStorage", vmGuests.GetTotalStorage(0));
@@ -116,17 +124,17 @@ namespace DiskReporter {
                                 if(!vmGuest.TotalSystemStorage.HasValue) vmGuest.TotalSystemStorage = vmGuest.GetSystemDisk().Capacity;
             					vmwareNodeDictionary.Add (nodename, vmGuest);
             				} catch (Exception e) {
-            					displayException (e);
+            					DisplayException (e);
             					continue;
             				}
             			}
             		}
             	} catch (Exception e) {
-            		displayException(e);
+            		DisplayException(e);
             	}
             }
             foreach (Exception e in vmExceptions) {
-            	displayException(e);
+            	DisplayException(e);
             }
         	//We are not looking for anything on the TSM side if a configuration for the TSM servers are not specified:
         	if (!String.IsNullOrEmpty (tsmServersConfig)) {
@@ -135,7 +143,7 @@ namespace DiskReporter {
         			List<Exception> tsmExceptions = new List<Exception>();
         			try {
                         int diskTimeSpanDays = 28;
-        				TsmMethods tSMPlugin = (TsmMethods)ourCommunicationPlugins.ComPlugins.Find(x => x.PluginName.ToUpper().Equals("TSM"));
+                        TsmPlugin tSMPlugin = (TsmPlugin)ourCommunicationPlugins.ComPlugins.Find(x => x.PluginName.ToUpper().Equals("TSM"));
         				TsmNodes tsmNodes = tSMPlugin.GetAllNodesData<TsmNodes, TsmNode>(tsmServersConfig, serverNameFilter, out tsmExceptions);
                         if (String.IsNullOrEmpty(serverNameFilter)) tsmNodeDictionary.Add("TotalCollectionStorage", tsmNodes.GetTotalStorage(diskTimeSpanDays));
                         if (String.IsNullOrEmpty(serverNameFilter)) tsmNodeDictionary.Add("TotalCollectionWindowsSystemStorage", tsmNodes.GetTotalWindowsSystemStorage(diskTimeSpanDays));
@@ -148,17 +156,17 @@ namespace DiskReporter {
                                     if(!tsmNode.TotalSystemStorage.HasValue) tsmNode.TotalSystemStorage = tsmNode.GetSystemDisk(new TimeSpan(diskTimeSpanDays, 0, 0, 0, 0)).Capacity;
                                     tsmNodeDictionary.Add(tsmNode.Name, tsmNode);
                                 } catch (Exception e) {
-                                    displayException(e);
+                                    DisplayException(e);
                                     continue;
                                 }
                             }
                         }
         			} catch (Exception e) {
                         if (console_present) Console.WriteLine("Fetching TSM Nodes Failed: ");
-        				displayException(e);
+        				DisplayException(e);
         			}
         			foreach (Exception e in tsmExceptions) {
-        				displayException(e);
+        				DisplayException(e);
         			}
         		}
         	}
@@ -169,7 +177,7 @@ namespace DiskReporter {
         /// </summary>
         /// <param name="tsmServersConfig">String representing the name an relative location of xml configuration file</param>
         /// <param name="vCenterConfig">String representing the name an relative location of xml configuration file</param>
-        public OrderedDictionary fetchAllNodeData(String tsmServersConfig, String vCenterConfig) {
+        public OrderedDictionary FetchAllNodeData(String tsmServersConfig, String vCenterConfig) {
          	OrderedDictionary nodeDictionary = new OrderedDictionary();
     		List<Exception> vmExceptions = new List<Exception>();
     		//We are not looking for anything in the vCenter if a configuration for the vCenter server is not specified:
@@ -181,17 +189,17 @@ namespace DiskReporter {
     						try {
     							nodeDictionary.Add (nodename, vmGuest);
     						} catch (Exception e) {
-    							displayException (e);
+    							DisplayException (e);
     							continue;
     						}
     					}
     				}
     			} catch (Exception e) {
-    				displayException (e);
+    				DisplayException (e);
     			}
     		}
     		foreach (Exception e in vmExceptions) {
-    				displayException (e);
+    				DisplayException (e);
     		}
          	//Add nodes from tsm to nodeDictionary only if the server name does not exist in nodeDictionary already:
          	List<Exception> tsmExceptions = new List<Exception>();
@@ -203,17 +211,17 @@ namespace DiskReporter {
     						try {
     							nodeDictionary.Add (tsmNode.Name, tsmNode);
     						} catch (Exception e) {
-    							displayException (e);
+    							DisplayException (e);
     							continue;
     						}
     					}
     				}
     			} catch (Exception e) {
                     if (console_present) Console.WriteLine("Fetching TSM Nodes Failed: ");
-                    displayException(e);            
+                    DisplayException(e);            
     			}
     			foreach (Exception e in tsmExceptions) {
-                    displayException (e);
+                    DisplayException (e);
     			}
     		}
             return nodeDictionary;
@@ -224,7 +232,7 @@ namespace DiskReporter {
         /// <param name="sheetName">Name of the sheet in Excel to be created</param>
         /// <param name="fileNameSuffix">Name to let the filename end with</param>
         /// <param name="nodeDictionary">OrderedDictionary with the data we want to create an report on</param>
-        public String createExcelReport(string sheetName, string fileNameSuffix, OrderedDictionary nodeDictionary) {
+        public String CreateExcelReport(string sheetName, string fileNameSuffix, OrderedDictionary nodeDictionary) {
     		CreateExcelDoc excel_app = new CreateExcelDoc(sheetName);
     		fileNameSuffix = String.IsNullOrEmpty(fileNameSuffix) ? String.Empty : fileNameSuffix;
     		string excelDocFileName = Directory.GetCurrentDirectory () + System.IO.Path.VolumeSeparatorChar + "diskReports-" + fileNameSuffix + DateTime.Now.Day.ToString () + DateTime.Now.Month.ToString () + DateTime.Now.Year.ToString () + ".xls";
@@ -261,7 +269,7 @@ namespace DiskReporter {
     			}
     			excel_app.SaveAndClose (excelDocFileName);
     		} catch (Exception e) {
-                displayException(e);
+                DisplayException(e);
     		}
     		return excelDocFileName;
     	}
@@ -271,11 +279,11 @@ namespace DiskReporter {
         /// <param name="tsmServersConfig">TSM configuration file</param>
         /// <param name="vCenterConfig">vCenter Configuration file</param>
         /// <param name="mailReceiver">The mail address to send to</param>
-      	public bool mailReport(String tsmServersConfig, String vCenterConfig, String mailReceiver) {
-            OrderedDictionary nodeDictionary = fetchAllNodeData(tsmServersConfig, vCenterConfig);
+      	public bool MailReport(String tsmServersConfig, String vCenterConfig, String mailReceiver) {
+            OrderedDictionary nodeDictionary = FetchAllNodeData(tsmServersConfig, vCenterConfig);
     		XmlReaderLocal mailSettingReader = new XmlReaderLocal("config_mailsettings.xml");
     		List<Hashtable> hashtableList = mailSettingReader.ReadAllMailSenders();
-    		string excelDocFileName = createExcelReport("Server Report", null, nodeDictionary);
+    		string excelDocFileName = CreateExcelReport("Server Report", null, nodeDictionary);
 
     		foreach (Hashtable htable in hashtableList) {
     			string smtpServer = (String)htable["SMTPSERVER"];
@@ -288,7 +296,7 @@ namespace DiskReporter {
     				mailSender.addAttachment(excelDocFileName);
     				mailSender.sendMessage();
     			} catch (Exception e) {
-                    displayException(e);
+                    DisplayException(e);
     			}
     		}
          	return (nodeDictionary.Count > 0 ? true : false);
