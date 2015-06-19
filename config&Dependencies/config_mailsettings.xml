@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<configContents xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config_mailsettings.xsd">
+	<SENDER>
+		<SMTPSERVER>8.8.8.8</SMTPSERVER>
+		<FROMADDRESS>messenger@messengers.com</FROMADDRESS>
+	</SENDER>
+</configContents>

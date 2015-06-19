@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<configContents xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config_vCenterServer.xsd">
+	<SERVER>
+		<VCENTER>8.8.8.8</VCENTER>
+		<DOMAIN>domain</DOMAIN>
+		<USER>vmChatter</USER>
+		<PASSWORD>Pass123</PASSWORD>
+	</SERVER>
+</configContents>

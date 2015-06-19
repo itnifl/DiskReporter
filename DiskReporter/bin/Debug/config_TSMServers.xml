@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<configContents xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config_TSMServers.xsd">
+	<SERVER>
+		<ADDRESS>8.8.8.8</ADDRESS>
+		<NAME>TSM01</NAME>
+		<USER>tsmChatter</USER>
+		<PASSWORD>Pass123</PASSWORD>
+	</SERVER>
+</configContents>

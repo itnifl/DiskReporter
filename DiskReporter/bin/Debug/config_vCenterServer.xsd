@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<xsd:annotation>
+	<xsd:documentation>vCenter Server Configuration</xsd:documentation>
+</xsd:annotation>
+
+<xsd:element name="configContents">
+	<xsd:complexType>
+		<xsd:sequence>
+			<xsd:element name="SERVER" type="serverConfig" maxOccurs="*" />
+		</xsd:sequence>
+	</xsd:complexType>
+</xsd:element>
+
+
+<xsd:complexType name="serverConfig">
+	<xsd:sequence>
+		<xsd:element name="VCENTER" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+		<xsd:element name="DOMAIN" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+		<xsd:element name="USER" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+		<xsd:element name="PASSWORD" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+	</xsd:sequence>
+</xsd:complexType>
+
+</xsd:schema>
