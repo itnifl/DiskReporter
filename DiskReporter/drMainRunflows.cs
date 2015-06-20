@@ -311,7 +311,7 @@ namespace DiskReporter {
     			try {
     				//Need to read correct sender and address from config file:
     				ndrMailMessage mailSender = new ndrMailMessage (smtpServer, fromAddress, mailReceiver);
-    				mailSender.setRegularSubject ("Disk Reports on " + DateTime.Now + ".xls");
+    				mailSender.setRegularSubject("Disk Reports on " + DateTime.Now + ".xls");
     				mailSender.addAttachment(excelDocFileName);
     				mailSender.sendMessage();
     			} catch (Exception e) {

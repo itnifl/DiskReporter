@@ -78,6 +78,7 @@
     <Compile Include="drComPluginList.cs" />
     <Compile Include="drPluginGenerics.cs" />
     <Compile Include="NUnitTests\TestTsmNodesPlugin.cs" />
+    <Compile Include="NUnitTests\TestVMwareNodesPlugin.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

@@ -43,6 +43,7 @@ test-results/
 *.log
 *.scc
 *.xls
+*.exe
 
 # Visual C++ cache files
 ipch/

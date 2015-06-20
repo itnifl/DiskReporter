@@ -4,7 +4,7 @@ Disk Report System
 Initial Comments
 ----------------
 
- This system uses re-usable code to fetch sizes of disks on servers found in TSM and VMWare. Both these sources of data are organized as plugin code for the option of adding more plugins later. The code can be compiled as a console application and used with command line arguments, or it can be compiled as an dll and the code re-used to fetch servers represented as objects for usage in your own system.
+ This system uses NUnit tested re-usable code to fetch sizes of disks on servers found in TSM and VMWare. See NUnitTests folder for available tests. Both these sources of data are organized as plugin code for the option of adding more plugins later. The code can be compiled as a console application and used with command line arguments, or it can be compiled as an dll and the code re-used to fetch servers represented as objects for usage in your own system.
 
 
 Prerequisites

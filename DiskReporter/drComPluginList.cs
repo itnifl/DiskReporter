@@ -49,6 +49,7 @@ namespace DiskReporter {
         /// Instantiates all plugins that are defined in the method to usable objects
         /// </summary>
         public void LoadAllPlugins() {
+            this.ComPlugins.Clear();
             this.RegisterPlugin(new VmPlugin("VMware") { NodeObjectType = new TypeDelegator(typeof(VmGuest)), NodesObjectType = new TypeDelegator (typeof(VmGuests)) });
             this.RegisterPlugin(new TsmPlugin("TSM") { NodeObjectType = new TypeDelegator (typeof(TsmNode)), NodesObjectType = new TypeDelegator (typeof(TsmNodes)) });
         }
