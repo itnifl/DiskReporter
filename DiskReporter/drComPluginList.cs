@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Reflection;
 using DiskReporter.PluginContracts;
 
@@ -83,8 +84,11 @@ namespace DiskReporter {
             List<string> failures = new List<string>();
             bool allOK = false;
             foreach(IComPlugin plugin in ComPlugins) {
-                if(!plugin.CheckPrerequisites()) {
-                    failures.Add("Warning: " + plugin.PluginName + " failed its prerequisites check.");
+                List<Exception> outExceptions = new List<Exception>();
+                if(!plugin.CheckPrerequisites(out outExceptions)) {
+                    StringBuilder sBuilder = new StringBuilder();
+                    outExceptions.ForEach(x => sBuilder.Append(x.ToString()));
+                    failures.Add("Warning: " + plugin.PluginName + " failed its prerequisites check:" + sBuilder);
                 }
             }
             if(failures.Count == 0) {

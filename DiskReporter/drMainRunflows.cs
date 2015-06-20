@@ -20,7 +20,7 @@ namespace DiskReporter {
     }*/
     public class DiskReporterMainRunFlows {
         StreamWriter log;
-        String configDirectory = "";
+        String ConfigDirectory { get; set; }
         private bool? _console_present;
         String logFilename;
         private ComPluginList ourCommunicationPlugins;
@@ -32,8 +32,8 @@ namespace DiskReporter {
         }
         public DiskReporterMainRunFlows(StreamWriter log, String configDirectory) {
             this.log = log;
+            this.ConfigDirectory = configDirectory;
             if (!configDirectory[configDirectory.Length - 1].Equals("\\")) configDirectory += "\\";
-            this.configDirectory = configDirectory;
             logFilename = ((FileStream)(log.BaseStream)).Name;
             this.ourCommunicationPlugins = new ComPluginList();
             //Now we check if there are any prerequisites missing to our plugins and warn to error log and console if there is:
@@ -101,17 +101,17 @@ namespace DiskReporter {
         /// <param name="ourConfigSettings">Hashtable where key is plugin name and value is configurationfile</param>
         public OrderedDictionary FetchNodeData(Hashtable ourConfigSettings) {
             throw new NotImplementedException();
-            List<Exception> exceptionList = new List<Exception>();
+            /*List<Exception> exceptionList = new List<Exception>();
             foreach (DictionaryEntry entry in ourConfigSettings) {
-                //Console.WriteLine("{0}, {1}", entry.Key, entry.Value);
-                var ourPlugin = ourCommunicationPlugins.ComPlugins.Find(x => x.PluginName.ToUpper().Equals(entry.Key.ToString()));
-
-                //ourPlugin.GetAllNodesData <ourPlugin.NodesObjectType, ourPlugin.NodeObjectType>("", "", out exceptionList);
-                //Type guest = new TypeDelegator (typeof(VmGuest));
-                //MethodInfo method = typeof(ourPlugin).GetMethod("GenericMethod");
+                Type NodeObjectType = (Type)ourCommunicationPlugins.ComPlugins.Find(x => x.PluginName.ToUpper().Equals(entry.Key.ToString())).NodeObjectType;
+                Type NodesObjectType = (Type)ourCommunicationPlugins.ComPlugins.Find(x => x.PluginName.ToUpper().Equals(entry.Key.ToString())).NodesObjectType;
+                //Needs to use reflection, not a good idea for performance:
+                //http://stackoverflow.com/questions/4101784/calling-a-generic-method-with-a-dynamic-type
+                //var test = ourPlugin.GetAllNodesData <NodesObjectType, NodeObjectType>("", "", out exceptionList);
+                //MethodInfo method = typeof(NodeObjectType).GetMethod("GenericMethod");
                 //MethodInfo generic = method.MakeGenericMethod(myType);
                 //generic.Invoke(this, null);
-            }
+            }*/
         }
         /// <summary>
         /// Returns all nodes fetched from the VMware and TSM plugins as seperate dictionaries
@@ -300,7 +300,7 @@ namespace DiskReporter {
         /// <param name="mailReceiver">The mail address to send to</param>
       	public bool MailReport(String tsmServersConfig, String vCenterConfig, String mailReceiver) {
             OrderedDictionary nodeDictionary = FetchTsmVMwareNodeData(tsmServersConfig, vCenterConfig);
-    		XmlReaderLocal mailSettingReader = new XmlReaderLocal("config_mailsettings.xml");
+            XmlReaderLocal mailSettingReader = new XmlReaderLocal(Directory.GetCurrentDirectory() + System.IO.Path.VolumeSeparatorChar + "config_mailsettings.xml");
     		List<Hashtable> hashtableList = mailSettingReader.ReadAllMailSenders();
     		string excelDocFileName = CreateExcelReport("Server Report", null, nodeDictionary);
 

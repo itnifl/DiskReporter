@@ -25,7 +25,7 @@ namespace DiskReporter {
             foreach (TsmNode tsmNode in Nodes) {
                 yield return tsmNode;
             }
-         }
+        }
         /// <summary>
         ///  Gets the total storage space of all disks registered on all nodes.
         /// </summary>
@@ -220,7 +220,7 @@ namespace DiskReporter {
             			String exceptionText = exc.ToString();
             			String tsmMessageText = "";
             			foreach (var m in exc.TSMMessages) tsmMessageText += " " + m.ToString() + "\n";
-            			cachedTSMException = new Exception("Error from TSM AdminClient when working with TSMServer " + tsmServerAddress + ": " + exceptionText + " - " + tsmMessageText + ". DBQuery was: " + dbQUERY);
+                        cachedTSMException = new Exception("Error: " + result + " Error from TSM AdminClient when working with TSMServer " + tsmServerAddress + ": " + exceptionText + " - " + tsmMessageText + ". DBQuery was: " + dbQUERY);
             			loopExceptions.Add(cachedTSMException);
             			currentException = true;
             			continue;
@@ -290,19 +290,24 @@ namespace DiskReporter {
             stream.Position = 0;
             return stream;
         }
-        public bool CheckPrerequisites() {
+        public bool CheckPrerequisites(out List<Exception> outExceptions) {
             bool allOK = true;
+            outExceptions = new List<Exception>();
             if (Environment.OSVersion.Platform == PlatformID.Unix) {
                 var sBinPath = @"/opt/tivoli/tsm/client/ba/bin";
                 var sDsmAdmc = Path.Combine(sBinPath, "dsmadmc");
-                if (!File.Exists(sDsmAdmc))
+                if (!File.Exists(sDsmAdmc)) {
                     allOK = false;
+                    outExceptions.Add(new Exception("Could not find " + sDsmAdmc));
+                }
             } else {
                 var prod = Kraggs.TSM.Utils.Win32.clsTSMRegistry.GetProductByName("TSM Administrative Client");
                 var sBinPath = prod.Path;
                 var sDsmAdmc = Path.Combine(sBinPath, "dsmadmc.exe");
-                if (!File.Exists(sDsmAdmc))
+                if (!File.Exists(sDsmAdmc)) {
                     allOK = false;
+                    outExceptions.Add(new Exception("Could not find " + sDsmAdmc));
+                }
             }
             return allOK;
         }

@@ -59,6 +59,7 @@
       <HintPath>..\config&amp;Dependencies\NPOI.dll</HintPath>
     </Reference>
     <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="nunit.framework" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -76,6 +77,7 @@
     <Compile Include="drVmGuestPlugin.cs" />
     <Compile Include="drComPluginList.cs" />
     <Compile Include="drPluginGenerics.cs" />
+    <Compile Include="NUnitTests\TestTsmNodesPlugin.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -89,4 +91,7 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+  <ItemGroup>
+    <Folder Include="NUnitTests\" />
+  </ItemGroup>
 </Project>

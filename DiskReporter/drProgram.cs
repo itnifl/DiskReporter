@@ -3,6 +3,11 @@ using System.IO;
 
 namespace DiskReporter {
    class Program {
+        static string configDirectory = Directory.GetCurrentDirectory();
+        static string tsmConfig = System.IO.Path.VolumeSeparatorChar + "config_TSMServers.xml";
+        static string vCenterConfig = System.IO.Path.VolumeSeparatorChar + "config_vCenterServer.xml";         
+        static string logName = "DiskReporter.log";
+
         /// <summary>
         ///  Displays the help menu
         /// </summary>
@@ -23,9 +28,7 @@ namespace DiskReporter {
         /// </summary>
       	static void Main(string[] args) {
 	        InputArguments arguments = new InputArguments(args);
-	        string configDirectory = "";
-	        Boolean runStatus = true;
-			string logName = "DiskReporter.log";
+            Boolean runStatus = true;
 					 
 	        StreamWriter log;
 			if (!File.Exists(logName)) {
@@ -43,8 +46,8 @@ namespace DiskReporter {
 			} else if (!String.IsNullOrEmpty(arguments["-mailReport"]) && !String.IsNullOrEmpty(arguments["-mailReport"])) {
 				string mailReceiver = MailValidator.IsValid(arguments["-mailReport"]) ? arguments["-mailReport"] : "";
 				if (!String.IsNullOrEmpty(mailReceiver)) {
-					runStatus = programFlow.MailReport(!String.IsNullOrEmpty(arguments["-tsm"]) ? configDirectory + "config_TSMServers.xml" : String.Empty,
-					                                   !String.IsNullOrEmpty(arguments["-vmware"]) ? configDirectory + "config_vCenterServer.xml" : String.Empty,
+					runStatus = programFlow.MailReport(!String.IsNullOrEmpty(arguments["-tsm"]) ? configDirectory + tsmConfig : String.Empty,
+					                                   !String.IsNullOrEmpty(arguments["-vmware"]) ? configDirectory + vCenterConfig : String.Empty,
 					                                   mailReceiver);
 				} else {
 					DisplayHelpMenu ();
@@ -52,8 +55,8 @@ namespace DiskReporter {
 			} else {
 				string serverName = !String.IsNullOrEmpty(arguments["-server"]) ? arguments["-server"] : String.Empty;
                 var result = programFlow.FetchTsmVMwareNodeData(
-					!String.IsNullOrEmpty(arguments["-tsm"]) ? configDirectory + "config_TSMServers.xml" : String.Empty,
-					!String.IsNullOrEmpty(arguments["-vmware"]) ? configDirectory + "config_vCenterServer.xml" : String.Empty, 
+                    !String.IsNullOrEmpty(arguments["-tsm"]) ? configDirectory + tsmConfig : String.Empty,
+                    !String.IsNullOrEmpty(arguments["-vmware"]) ? configDirectory + vCenterConfig : String.Empty, 
 					serverNameFilter: serverName);
 
 				System.Collections.Specialized.OrderedDictionary vmwareNodeDictionary = result.Item1;

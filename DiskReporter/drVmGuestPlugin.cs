@@ -174,18 +174,21 @@ namespace DiskReporter {
             outExceptions = loopExceptions;
             return returnGuests;
         }
-        public bool CheckPrerequisites() {
+        public bool CheckPrerequisites(out List<Exception> outExceptions) {
             bool allOK = true;
+            outExceptions = new List<Exception>();
             string currentDirectory = System.IO.Directory.GetCurrentDirectory();
 
             if (!System.Reflection.Assembly.LoadFrom("VMware.Vim.dll").GlobalAssemblyCache) { // not in gac
                 if (!System.IO.File.Exists(currentDirectory + System.IO.Path.VolumeSeparatorChar + "VMware.Vim.dll")) {
                     allOK = false;
+                    outExceptions.Add(new Exception("Could load or find VMware.Vim.dll"));
                 }
             }
             if (!System.Reflection.Assembly.LoadFrom("VMware.VimAutomation.Logging.SoapInterceptor.dll").GlobalAssemblyCache) { // not in gac
                 if (!System.IO.File.Exists(currentDirectory + System.IO.Path.VolumeSeparatorChar + "VMware.VimAutomation.Logging.SoapInterceptor.dll")) {
                     allOK = false;
+                    outExceptions.Add(new Exception("Could load or find VMware.VimAutomation.Logging.SoapInterceptor.dll"));
                 }
             }
             return allOK;

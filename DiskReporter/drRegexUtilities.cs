@@ -9,7 +9,7 @@ namespace DiskReporter {
         /// <param name="emailAddress">String representing a mail address</param>
         public static bool IsValid(string emailAddress) {
             try {
-                MailAddress m = new MailAddress(emailAddress);
+                new MailAddress(emailAddress);
                 return true;
             } catch (FormatException) {
                 return false;

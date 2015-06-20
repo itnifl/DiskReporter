@@ -65,6 +65,6 @@ namespace DiskReporter.PluginContracts {
 		T1 GetAllNodesData<T1, T2>(String sourceConfigFileName, string nameFilter, out List<Exception> outExceptions) 
 			where T1 : IComNodeList<T2>, new()
 				where T2 : IComNode, new();
-        bool CheckPrerequisites();
+        bool CheckPrerequisites(out List<Exception> outExceptions);
 	}
 }
