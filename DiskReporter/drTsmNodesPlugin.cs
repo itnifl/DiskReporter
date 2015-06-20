@@ -1,12 +1,13 @@
 ﻿using System;
-using System.IO;
-using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.IO;
+using System.Linq;
 using Kraggs.TSM;
 using Kraggs.TSM.Utils;
-using VMWareChatter.XmlReader;
 using DiskReporter.PluginContracts;
+using VMWareChatter.XmlReader;
 
 namespace DiskReporter {
     class TsmNodes : IComNodeList<TsmNode> {
@@ -149,7 +150,18 @@ namespace DiskReporter {
         public DateTime LAST_BACKUP_END { get; set; }
     }
     public class TsmPlugin : IComPlugin {
+        [Required(ErrorMessage = "The plugin needs to be named", AllowEmptyStrings = false)]
         public string PluginName { get; set; }
+        /// <summary>
+        ///  Keeps track of what T1 should be like in GetAllNodesData
+        /// </summary>
+        [Required(ErrorMessage = "Type of object to list nodes required")]
+        public Type NodesObjectType { get; set;}
+        /// <summary>
+        ///  Keeps track of what T2 should be like in GetAllNodesData
+        /// </summary>
+        [Required(ErrorMessage = "Type of node object is required")]
+        public Type NodeObjectType { get; set;}
         /*  Requires TSM Admin Client
          *    for full functionality,
          *      works for testing in debug mode.

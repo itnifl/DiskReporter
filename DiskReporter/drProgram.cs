@@ -51,7 +51,7 @@ namespace DiskReporter {
 				}
 			} else {
 				string serverName = !String.IsNullOrEmpty(arguments["-server"]) ? arguments["-server"] : String.Empty;
-				var result = programFlow.FetchAllNodeDataAsSeparatedDicts(
+                var result = programFlow.FetchTsmVMwareNodeData(
 					!String.IsNullOrEmpty(arguments["-tsm"]) ? configDirectory + "config_TSMServers.xml" : String.Empty,
 					!String.IsNullOrEmpty(arguments["-vmware"]) ? configDirectory + "config_vCenterServer.xml" : String.Empty, 
 					serverNameFilter: serverName);

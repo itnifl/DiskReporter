@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace DiskReporter.PluginContracts {
     /// <summary>
@@ -44,7 +45,18 @@ namespace DiskReporter.PluginContracts {
     /// Represents a plugin
     /// </summary>
 	public interface IComPlugin {	
+        [Required(ErrorMessage = "The plugin needs to be named", AllowEmptyStrings = false)]
 		string PluginName { get; set; }
+        /// <summary>
+        ///  Keeps track of what T1 should be like in GetAllNodesData
+        /// </summary>
+        [Required(ErrorMessage = "Type of object to list nodes required")]
+        Type NodesObjectType { get; set;}
+        /// <summary>
+        ///  Keeps track of what T2 should be like in GetAllNodesData
+        /// </summary>
+        [Required(ErrorMessage = "Type of node object is required")]
+        Type NodeObjectType { get; set;}
 
 		IComPlugin GetPlugin();
         /// <summary>

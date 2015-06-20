@@ -1,12 +1,13 @@
 ﻿using System;
-using System.Net;
-using System.IO;
-using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
-using VMWareChatter.XmlReader;
-using VMWareChatter;
+using System.ComponentModel.DataAnnotations;
+using System.IO;
+using System.Linq;
+using System.Net;
 using DiskReporter.PluginContracts;
+using VMWareChatter;
+using VMWareChatter.XmlReader;
 
 namespace DiskReporter {
     public class VmGuests : IComNodeList<VmGuest> {
@@ -107,7 +108,18 @@ namespace DiskReporter {
         }
    }
     class VmPlugin : IComPlugin {
+        [Required(ErrorMessage = "The plugin needs to be named", AllowEmptyStrings = false)]
         public string PluginName { get; set;}
+        /// <summary>
+        ///  Keeps track of what T1 should be like in GetAllNodesData
+        /// </summary>
+        [Required(ErrorMessage = "Type of object to list nodes required")]
+        public Type NodesObjectType { get; set;}
+        /// <summary>
+        ///  Keeps track of what T2 should be like in GetAllNodesData
+        /// </summary>
+        [Required(ErrorMessage = "Type of node object is required")]
+        public Type NodeObjectType { get; set;}
         /*  Requires VMware.Vim.dll
          *  Requires VMware.VimAutomation.Logging.SoapInterceptor.dll
          *  These should be checked if are available either in local folder or in GAC
@@ -133,7 +145,7 @@ namespace DiskReporter {
 		{
 			VCenterCommunicator vCom = new VCenterCommunicator ();
 			XmlReaderLocal vmConfigReader = new XmlReaderLocal(sourceConfigFileName);
-	     	List<Hashtable> hashtableList = vmConfigReader.ReadAllServers();
+            List<Hashtable> hashtableList = vmConfigReader.ReadAllServers();
 			List<Exception> loopExceptions = new List<Exception>();
 			VmGuests ourGuests = new VmGuests();
 			T1 returnGuests = new T1();
@@ -161,7 +173,7 @@ namespace DiskReporter {
 	     	}
             outExceptions = loopExceptions;
             return returnGuests;
-	    }
+        }
         public bool CheckPrerequisites() {
             bool allOK = true;
             string currentDirectory = System.IO.Directory.GetCurrentDirectory();

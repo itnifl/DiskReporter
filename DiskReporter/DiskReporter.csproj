@@ -58,6 +58,7 @@
     <Reference Include="NPOI">
       <HintPath>..\config&amp;Dependencies\NPOI.dll</HintPath>
     </Reference>
+    <Reference Include="System.ComponentModel.DataAnnotations" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -95,12 +96,30 @@ namespace DiskReporter {
             if(console_present) Console.WriteLine("Error - see the logs for more information: " + ex.ToString().Substring(0, (ex.ToString().Length > 160 ? 160 : 40)));
         }
         /// <summary>
-        /// Returns all nodes fetched from the two existing plugins as seperate dictionaries
+        /// Returns all nodes fetched from all plugins registered in our pluginlist
+        /// </summary>
+        /// <param name="ourConfigSettings">Hashtable where key is plugin name and value is configurationfile</param>
+        public OrderedDictionary FetchNodeData(Hashtable ourConfigSettings) {
+            throw new NotImplementedException();
+            List<Exception> exceptionList = new List<Exception>();
+            foreach (DictionaryEntry entry in ourConfigSettings) {
+                //Console.WriteLine("{0}, {1}", entry.Key, entry.Value);
+                var ourPlugin = ourCommunicationPlugins.ComPlugins.Find(x => x.PluginName.ToUpper().Equals(entry.Key.ToString()));
+
+                //ourPlugin.GetAllNodesData <ourPlugin.NodesObjectType, ourPlugin.NodeObjectType>("", "", out exceptionList);
+                //Type guest = new TypeDelegator (typeof(VmGuest));
+                //MethodInfo method = typeof(ourPlugin).GetMethod("GenericMethod");
+                //MethodInfo generic = method.MakeGenericMethod(myType);
+                //generic.Invoke(this, null);
+            }
+        }
+        /// <summary>
+        /// Returns all nodes fetched from the VMware and TSM plugins as seperate dictionaries
         /// </summary>
         /// <param name="tsmServersConfig">String representing the name an relative location of xml configuration file</param>
         /// <param name="vCenterConfig">String representing the name an relative location of xml configuration file</param>
         /// <param name="serverNameFilter">Name of server to filter out from the result</param>
-        public Tuple<OrderedDictionary, OrderedDictionary> FetchAllNodeDataAsSeparatedDicts(string tsmServersConfig, string vCenterConfig, string serverNameFilter) {
+        public Tuple<OrderedDictionary, OrderedDictionary> FetchTsmVMwareNodeData(string tsmServersConfig, string vCenterConfig, string serverNameFilter) {
             OrderedDictionary vmwareNodeDictionary = new OrderedDictionary();
             OrderedDictionary tsmNodeDictionary = new OrderedDictionary();
             List<Exception> vmExceptions = new List<Exception>();
@@ -173,11 +192,11 @@ namespace DiskReporter {
             return Tuple.Create(vmwareNodeDictionary, tsmNodeDictionary);
         }
         /// <summary>
-        /// Returns all nodes fetched from the two existing plugins as seperate dictionaries
+        /// Returns all nodes fetched from the VMware and TSM plugins as one dictionary
         /// </summary>
         /// <param name="tsmServersConfig">String representing the name an relative location of xml configuration file</param>
         /// <param name="vCenterConfig">String representing the name an relative location of xml configuration file</param>
-        public OrderedDictionary FetchAllNodeData(String tsmServersConfig, String vCenterConfig) {
+        public OrderedDictionary FetchTsmVMwareNodeData(String tsmServersConfig, String vCenterConfig) {
          	OrderedDictionary nodeDictionary = new OrderedDictionary();
     		List<Exception> vmExceptions = new List<Exception>();
     		//We are not looking for anything in the vCenter if a configuration for the vCenter server is not specified:
@@ -280,7 +299,7 @@ namespace DiskReporter {
         /// <param name="vCenterConfig">vCenter Configuration file</param>
         /// <param name="mailReceiver">The mail address to send to</param>
       	public bool MailReport(String tsmServersConfig, String vCenterConfig, String mailReceiver) {
-            OrderedDictionary nodeDictionary = FetchAllNodeData(tsmServersConfig, vCenterConfig);
+            OrderedDictionary nodeDictionary = FetchTsmVMwareNodeData(tsmServersConfig, vCenterConfig);
     		XmlReaderLocal mailSettingReader = new XmlReaderLocal("config_mailsettings.xml");
     		List<Hashtable> hashtableList = mailSettingReader.ReadAllMailSenders();
     		string excelDocFileName = CreateExcelReport("Server Report", null, nodeDictionary);
