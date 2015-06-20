@@ -44,6 +44,7 @@ test-results/
 *.scc
 *.xls
 *.exe
+*.mdb
 
 # Visual C++ cache files
 ipch/
