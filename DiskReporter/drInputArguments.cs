@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
+/*using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using System.Threading.Tasks;*/
 
 //This code is from http://dotnetfollower.com/wordpress/2012/03/c-simple-command-line-arguments-parser/
 namespace DiskReporter {

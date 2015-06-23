@@ -2,9 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.IO;
 using System.Linq;
-using System.Net;
 using DiskReporter.PluginContracts;
 using VMWareChatter;
 using VMWareChatter.XmlReader;

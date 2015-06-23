@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Reflection;
-using System.Drawing;
 using Excel = Microsoft.Office.Interop.Excel; //Requires having Excel installed - not used in this version of the system
 
 namespace ExcelMagic {

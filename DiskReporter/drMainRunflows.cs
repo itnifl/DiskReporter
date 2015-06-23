@@ -1,11 +1,8 @@
 using System;
-using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Diagnostics;
 using System.IO;
-using System.Net;
 using System.Reflection;
 using ExcelMagic;
 using VMWareChatter.XmlReader;
