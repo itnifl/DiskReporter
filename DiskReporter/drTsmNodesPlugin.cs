@@ -66,6 +66,12 @@ namespace DiskReporter {
       public long? TotalStorage { get; set; }
       public long? TotalSystemStorage { get; set; }
       public TimeSpan? LastUsedTimeSpan { get;  set; } //This is the last TimeSpan used when fetching data information. The usage of this is possibly ambiguous.
+      public string PowerStatus { get; set; }
+      public string IP { get; set; }
+      public string State { get; set; }
+      public string ToolsStatus { get; set; }
+      public string ToolsVersionStatus { get; set; }
+      public string OSFamily { get; set; }
 
       public TsmNode() {
          this.Name = "Noname";

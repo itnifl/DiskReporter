@@ -166,12 +166,18 @@ namespace DiskReporter {
                foreach (GeneralDisk disk in ourGuest.Disks) {
                   disk.PCT_UTIL = Convert.ToInt64((double)(1 - ((double)disk.FreeSpace / (double)disk.Capacity)) * 100);
                }
-					returnGuests.AddNode(new T2() {
-						Name = ourGuest.Name,
-						Disks = ourGuest.Disks,
-						TotalStorage = ourGuest.TotalStorage,
-						TotalSystemStorage = ourGuest.TotalSystemStorage
-					});
+               returnGuests.AddNode(new T2() {
+                  Name = ourGuest.Name,
+                  Disks = ourGuest.Disks,
+                  TotalStorage = ourGuest.TotalStorage,
+                  TotalSystemStorage = ourGuest.TotalSystemStorage,
+                  PowerStatus = ourGuest.PowerStatus,
+                  IP = ourGuest.IP,
+                  State = ourGuest.State,
+                  ToolsStatus = ourGuest.ToolsStatus,
+                  ToolsVersionStatus = ourGuest.ToolsVersionStatus,
+                  OSFamily = ourGuest.OSFamily
+               });
 				}
 	     	}
          outExceptions = loopExceptions;

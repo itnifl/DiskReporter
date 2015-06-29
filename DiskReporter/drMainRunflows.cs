@@ -138,7 +138,7 @@ namespace DiskReporter {
             				try {
                            if(!vmGuest.TotalStorage.HasValue) vmGuest.TotalStorage = vmGuest.GetTotalStorageSpace();
                            if(!vmGuest.TotalSystemStorage.HasValue) vmGuest.TotalSystemStorage = vmGuest.GetSystemDisk().Capacity;
-            					vmwareNodeDictionary.Add (nodename, vmGuest);
+            					vmwareNodeDictionary.Add(nodename, vmGuest);
             				} catch (Exception e) {
             					DisplayException (e);
             					continue;
@@ -178,8 +178,8 @@ namespace DiskReporter {
                             }
                         }
         			} catch (Exception e) {
-                        if (console_present) Console.WriteLine("Fetching TSM Nodes Failed: ");
-        				DisplayException(e);
+                  if (console_present) Console.WriteLine("Fetching TSM Nodes Failed: ");
+                  DisplayException(e);
         			}
         			foreach (Exception e in tsmExceptions) {
         				DisplayException(e);

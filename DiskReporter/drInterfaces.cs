@@ -19,10 +19,16 @@ namespace DiskReporter.PluginContracts {
    /// Represents a node in a list of nodes returned by a plugin
    /// </summary>
 	public interface IComNode {	
-		string Name { get; set; }
-		List<GeneralDisk> Disks { get; set; }
-		long? TotalStorage { get; set; }
-		long? TotalSystemStorage { get; set; }
+      string Name { get; set; }
+      List<GeneralDisk> Disks { get; set; }
+      long? TotalStorage { get; set; }
+      long? TotalSystemStorage { get; set; }
+      string PowerStatus { get; set; }
+      string IP { get; set; }
+      string State { get; set; }
+      string ToolsStatus { get; set; }
+      string ToolsVersionStatus { get; set; }
+      string OSFamily { get; set; }
 		  
 		void AddDisk(GeneralDisk disk);
 		long? GetTotalStorageSpace();
