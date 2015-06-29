@@ -3,14 +3,14 @@ using System.IO;
 
 namespace DiskReporter {
    class Program {
-        static string configDirectory = Directory.GetCurrentDirectory();
-        static string tsmConfig = System.IO.Path.VolumeSeparatorChar + "config_TSMServers.xml";
-        static string vCenterConfig = System.IO.Path.VolumeSeparatorChar + "config_vCenterServer.xml";         
-        static string logName = "DiskReporter.log";
+      static string configDirectory = Directory.GetCurrentDirectory();
+      static string tsmConfig = System.IO.Path.DirectorySeparatorChar + "config_TSMServers.xml";
+      static string vCenterConfig = System.IO.Path.DirectorySeparatorChar + "config_vCenterServer.xml";         
+      static string logName = "DiskReporter.log";
 
-        /// <summary>
-        ///  Displays the help menu
-        /// </summary>
+      /// <summary>
+      ///  Displays the help menu
+      /// </summary>
 		static void DisplayHelpMenu() {
 			Console.WriteLine ("");
 			Console.WriteLine ("****Disk Report System Help Screen****");
@@ -23,23 +23,24 @@ namespace DiskReporter {
 			Console.WriteLine ("    -excel - pipe result to XML - optional");
 			Console.WriteLine ("    -help - to show this screen");
 		}
-        /// <summary>
-        ///  Runs the console application if compiled as one
-        /// </summary>
-      	static void Main(string[] args) {
-	        InputArguments arguments = new InputArguments(args);
-            Boolean runStatus = true;
+      /// <summary>
+      ///  Runs the console application if compiled as one
+      /// </summary>
+      static void Main(string[] args) {
+         InputArguments arguments = new InputArguments(args);
+         Boolean runStatus = true;
 					 
-	        StreamWriter log;
+         StreamWriter log;
 			if (!File.Exists(logName)) {
 				log = new StreamWriter(logName);
-	        } else {
+	      } else {
 				log = File.AppendText(logName);
-	        }
+	      }
 	    	DiskReporterMainRunFlows programFlow = new DiskReporterMainRunFlows(log);
+         //Console.WriteLine("Using: " + configDirectory + tsmConfig);
+         //Console.WriteLine("Using: " + configDirectory + vCenterConfig);
 			if(String.IsNullOrEmpty(arguments["-tsm"]) && String.IsNullOrEmpty(arguments["-vmware"])) {
 				arguments.AddInputArguments (new[] {"-tsm","-vmware"});
-
 			}
 			if (!String.IsNullOrEmpty(arguments ["-help"])) {
 				DisplayHelpMenu ();
@@ -50,7 +51,7 @@ namespace DiskReporter {
 					                                   !String.IsNullOrEmpty(arguments["-vmware"]) ? configDirectory + vCenterConfig : String.Empty,
 					                                   mailReceiver);
 				} else {
-					DisplayHelpMenu ();
+					DisplayHelpMenu();
 				}
 			} else {
 				string serverName = !String.IsNullOrEmpty(arguments["-server"]) ? arguments["-server"] : String.Empty;

@@ -124,8 +124,8 @@ namespace DiskReporter {
             //We are not looking for anything in the vCenter if a configuration for the vCenter server is not specified:
             if (!String.IsNullOrEmpty (vCenterConfig)) {
             	try {
-                    VmPlugin vMwarePlugin = (VmPlugin)ourCommunicationPlugins.ComPlugins.Find(x => x.PluginName.ToUpper().Equals("VMWARE"));
-            	    VmGuests vmGuests = vMwarePlugin.GetAllNodesData<VmGuests, VmGuest>(vCenterConfig, serverNameFilter, out vmExceptions);
+                  VmPlugin vMwarePlugin = (VmPlugin)ourCommunicationPlugins.ComPlugins.Find(x => x.PluginName.ToUpper().Equals("VMWARE"));
+                  VmGuests vmGuests = vMwarePlugin.GetAllNodesData<VmGuests, VmGuest>(vCenterConfig, serverNameFilter, out vmExceptions);
             		if (String.IsNullOrEmpty (serverNameFilter))
             			vmwareNodeDictionary.Add ("TotalCollectionStorage", vmGuests.GetTotalStorage(0));
             		if (String.IsNullOrEmpty (serverNameFilter))
@@ -136,8 +136,8 @@ namespace DiskReporter {
             			String nodename = vmGuest.Name.Contains (".") ? vmGuest.Name.Split ('.') [0].ToUpper () : vmGuest.Name.ToUpper ();
             			if (!String.IsNullOrEmpty (nodename) && !vmwareNodeDictionary.Contains (nodename)) {
             				try {
-                                if(!vmGuest.TotalStorage.HasValue) vmGuest.TotalStorage = vmGuest.GetTotalStorageSpace();
-                                if(!vmGuest.TotalSystemStorage.HasValue) vmGuest.TotalSystemStorage = vmGuest.GetSystemDisk().Capacity;
+                           if(!vmGuest.TotalStorage.HasValue) vmGuest.TotalStorage = vmGuest.GetTotalStorageSpace();
+                           if(!vmGuest.TotalSystemStorage.HasValue) vmGuest.TotalSystemStorage = vmGuest.GetSystemDisk().Capacity;
             					vmwareNodeDictionary.Add (nodename, vmGuest);
             				} catch (Exception e) {
             					DisplayException (e);
@@ -160,7 +160,7 @@ namespace DiskReporter {
         			try {
                         int diskTimeSpanDays = 28;
                         TsmPlugin tSMPlugin = (TsmPlugin)ourCommunicationPlugins.ComPlugins.Find(x => x.PluginName.ToUpper().Equals("TSM"));
-        				TsmNodes tsmNodes = tSMPlugin.GetAllNodesData<TsmNodes, TsmNode>(tsmServersConfig, serverNameFilter, out tsmExceptions);
+        				      TsmNodes tsmNodes = tSMPlugin.GetAllNodesData<TsmNodes, TsmNode>(tsmServersConfig, serverNameFilter, out tsmExceptions);
                         if (String.IsNullOrEmpty(serverNameFilter)) tsmNodeDictionary.Add("TotalCollectionStorage", tsmNodes.GetTotalStorage(diskTimeSpanDays));
                         if (String.IsNullOrEmpty(serverNameFilter)) tsmNodeDictionary.Add("TotalCollectionWindowsSystemStorage", tsmNodes.GetTotalWindowsSystemStorage(diskTimeSpanDays));
                         if (String.IsNullOrEmpty(serverNameFilter)) tsmNodeDictionary.Add("TotalCollectionLinuxRootStorage", tsmNodes.GetTotalLinuxRootStorage(diskTimeSpanDays));
@@ -251,7 +251,7 @@ namespace DiskReporter {
         public String CreateExcelReport(string sheetName, string fileNameSuffix, OrderedDictionary nodeDictionary) {
     		CreateExcelDoc excel_app = new CreateExcelDoc(sheetName);
     		fileNameSuffix = String.IsNullOrEmpty(fileNameSuffix) ? String.Empty : fileNameSuffix;
-    		string excelDocFileName = Directory.GetCurrentDirectory () + System.IO.Path.VolumeSeparatorChar + "diskReports-" + fileNameSuffix + DateTime.Now.Day.ToString () + DateTime.Now.Month.ToString () + DateTime.Now.Year.ToString () + ".xls";
+    		string excelDocFileName = Directory.GetCurrentDirectory () + System.IO.Path.DirectorySeparatorChar + "diskReports-" + fileNameSuffix + DateTime.Now.Day.ToString () + DateTime.Now.Month.ToString () + DateTime.Now.Year.ToString () + ".xls";
 
     		try {
     			excel_app.CreateHeaders(1, 1, "All servers and their total sizes(" + DateTime.Now + ")", "B2", "H2", 6, "GRAY", true, 24, "n");
@@ -297,7 +297,7 @@ namespace DiskReporter {
         /// <param name="mailReceiver">The mail address to send to</param>
       	public bool MailReport(String tsmServersConfig, String vCenterConfig, String mailReceiver) {
             OrderedDictionary nodeDictionary = FetchTsmVMwareNodeData(tsmServersConfig, vCenterConfig);
-            XmlReaderLocal mailSettingReader = new XmlReaderLocal(Directory.GetCurrentDirectory() + System.IO.Path.VolumeSeparatorChar + "config_mailsettings.xml");
+            XmlReaderLocal mailSettingReader = new XmlReaderLocal(Directory.GetCurrentDirectory() + System.IO.Path.DirectorySeparatorChar + "config_mailsettings.xml");
     		List<Hashtable> hashtableList = mailSettingReader.ReadAllMailSenders();
     		string excelDocFileName = CreateExcelReport("Server Report", null, nodeDictionary);
 

@@ -10,9 +10,10 @@ namespace DiskReporter {
             this.Capacity = capacity;
             this.PCT_UTIL = pct_util;
             this.LAST_BACKUP_END = last_backup_end;
+            this.FreeSpace = (long)(capacity * (pct_util / 100));
         }
         public GeneralDisk() {
-            this.LAST_BACKUP_END = DateTime.Today;
+            this.LAST_BACKUP_END = DateTime.Today; //This is the default, marks the disks and its data as current. Maybe confusing for VMware servers where there is no backup informatiin.
         }
         public double PCT_UTIL { get; set; }
         public DateTime LAST_BACKUP_END { get; set; }
