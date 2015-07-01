@@ -20,7 +20,8 @@ namespace DiskReporter {
          if (newLogFileCreated) File.Delete(objectLogRelativePath + logName);
       }
       /// <summary>
-      /// Returns all nodes and theyr data as one dictionary fetched from the VMware and TSM plugins
+      /// Returns all nodes and all the data as one dictionary fetched from the VMware and TSM plugins.
+      /// TSM nodes are not included if they are also found in VMware.
       /// </summary>
       /// <returns>{ ServerCollection = serverCollection, TotalStorage = totalStorageSum }</returns>
       /// <param name="rPath">String representing the path that the XML configuration is in under</param>
@@ -88,7 +89,7 @@ namespace DiskReporter {
          }
          return new { ServerCollection = serverCollection, TotalStorage = totalStorageSum };
       }
-      private Dictionary<string, long> HandleListStorageData(string key, Dictionary<string, long> pairList, System.Collections.Specialized.OrderedDictionary itemDictionary) {
+      private Dictionary<string, long> HandleListStorageData(string key, Dictionary<string, long> pairList, OrderedDictionary itemDictionary) {
          var totalStorage = pairList.FirstOrDefault(x => x.Key == key);
          if (!totalStorage.Equals(default(KeyValuePair<string, long>)) && totalStorage.Key.Equals(key)) {
             pairList.Remove(key);
