@@ -10,57 +10,57 @@ using DiskReporter.PluginContracts;
 using VMWareChatter.XmlReader;
 
 namespace DiskReporter {
-    class TsmNodes : IComNodeList<TsmNode> {
-        public List<TsmNode> Nodes { get; set; }
-        public TsmNodes() {
-            Nodes = new List<TsmNode>();
-        }
-        public void AddNode(TsmNode node) {         
-            Nodes.Add(node);     
-        }
-        public IEnumerator<TsmNode> GetEnumerator() {
-            Nodes.Sort(delegate(TsmNode p1, TsmNode p2) {
-                return p1.Name.CompareTo(p2.Name);
-            });
-            foreach (TsmNode tsmNode in Nodes) {
-                yield return tsmNode;
-            }
-        }
-        /// <summary>
-        ///  Gets the total storage space of all disks registered on all nodes.
-        /// </summary>
-        /// <param name="daySpan">The time span in days that the disk must exist within/taken backup of</param>
-        public long? GetTotalStorage(int daySpan) {
-            long? totalStorage = 0;
-            Nodes.ForEach(x => totalStorage += x.GetTotalStorageSpace(new TimeSpan(daySpan, 0, 0, 0, 0)));
-            return totalStorage;
-        }
-        /// <summary>
-        ///  Gets the total windows system storage space of all disks registered on all nodes.
-        /// </summary>
-        /// <param name="daySpan">The time span in days that the disk must exist within/taken backup of</param>
-        public long? GetTotalWindowsSystemStorage(int daySpan) {
-            long? totalStorage = 0;
-            IEnumerable<GeneralDisk> systemDisks = from x in Nodes where x.GetSystemDisk(new TimeSpan(daySpan, 0, 0, 0, 0)).DiskPath.ToLower().Contains("c$") || (!x.GetSystemDisk(new TimeSpan(daySpan, 0, 0, 0, 0)).DiskPath.ToLower().Contains("c$") && x.GetSystemDisk(new TimeSpan(daySpan, 0, 0, 0, 0)).DiskPath.ToLower().Contains("m$")) select x.GetSystemDisk(new TimeSpan(daySpan, 0, 0, 0, 0));
-            foreach (GeneralDisk disk in systemDisks) {
-                totalStorage += disk.Capacity;
-            }
-            return totalStorage;
-        }
-        /// <summary>
-        ///  Gets the total Linux system storage space of all disks registered on all nodes.
-        /// </summary>
-        /// <param name="daySpan">The time span in days that the disk must exist within/taken backup of</param>
-        public long? GetTotalLinuxRootStorage(int daySpan) {
-            long? totalStorage = 0;
-            IEnumerable<GeneralDisk> systemDisks = from x in Nodes where x.GetSystemDisk(new TimeSpan(daySpan, 0, 0, 0, 0)).DiskPath.ToLower().Contains("/") select x.GetSystemDisk(new TimeSpan(14, 0, 0, 0, 0));
-            foreach (GeneralDisk disk in systemDisks) {
-                totalStorage += disk.Capacity;
-            }
-            return totalStorage;
-        }
-    }
-    class TsmNode : IComNode {
+   class TsmNodes : IComNodeList<TsmNode> {
+      public List<TsmNode> Nodes { get; set; }
+      public TsmNodes() {
+         Nodes = new List<TsmNode>();
+      }
+      public void AddNode(TsmNode node) {         
+         Nodes.Add(node);     
+      }
+      public IEnumerator<TsmNode> GetEnumerator() {
+         Nodes.Sort(delegate(TsmNode p1, TsmNode p2) {
+               return p1.Name.CompareTo(p2.Name);
+         });
+         foreach (TsmNode tsmNode in Nodes) {
+               yield return tsmNode;
+         }
+      }
+      /// <summary>
+      ///  Gets the total storage space of all disks registered on all nodes.
+      /// </summary>
+      /// <param name="daySpan">The time span in days that the disk must exist within/taken backup of</param>
+      public long? GetTotalStorage(int daySpan) {
+         long? totalStorage = 0;
+         Nodes.ForEach(x => totalStorage += x.GetTotalStorageSpace(new TimeSpan(daySpan, 0, 0, 0, 0)));
+         return totalStorage;
+      }
+      /// <summary>
+      ///  Gets the total windows system storage space of all disks registered on all nodes.
+      /// </summary>
+      /// <param name="daySpan">The time span in days that the disk must exist within/taken backup of</param>
+      public long? GetTotalWindowsSystemStorage(int daySpan) {
+         long? totalStorage = 0;
+         IEnumerable<GeneralDisk> systemDisks = from x in Nodes where x.GetSystemDisk(new TimeSpan(daySpan, 0, 0, 0, 0)).DiskPath.ToLower().Contains("c$") || (!x.GetSystemDisk(new TimeSpan(daySpan, 0, 0, 0, 0)).DiskPath.ToLower().Contains("c$") && x.GetSystemDisk(new TimeSpan(daySpan, 0, 0, 0, 0)).DiskPath.ToLower().Contains("m$")) select x.GetSystemDisk(new TimeSpan(daySpan, 0, 0, 0, 0));
+         foreach (GeneralDisk disk in systemDisks) {
+               totalStorage += disk.Capacity;
+         }
+         return totalStorage;
+      }
+      /// <summary>
+      ///  Gets the total Linux system storage space of all disks registered on all nodes.
+      /// </summary>
+      /// <param name="daySpan">The time span in days that the disk must exist within/taken backup of</param>
+      public long? GetTotalLinuxRootStorage(int daySpan) {
+         long? totalStorage = 0;
+         IEnumerable<GeneralDisk> systemDisks = from x in Nodes where x.GetSystemDisk(new TimeSpan(daySpan, 0, 0, 0, 0)).DiskPath.ToLower().Contains("/") select x.GetSystemDisk(new TimeSpan(14, 0, 0, 0, 0));
+         foreach (GeneralDisk disk in systemDisks) {
+               totalStorage += disk.Capacity;
+         }
+         return totalStorage;
+      }
+   }
+   class TsmNode : IComNode {
       public string Name { get; set; }
       public List<GeneralDisk> Disks { get; set; }
       public long? TotalStorage { get; set; }
@@ -140,8 +140,8 @@ namespace DiskReporter {
          this.TotalSystemStorage = returnDisk.Capacity;
          return returnDisk;
       }
-    }
-    class TsmProp {
+   }
+   class TsmProp {
       public TsmProp(string node_name, string filespace_name, long? capacity, double pct_util, DateTime last_backup_end) {
          this.NODE_NAME = node_name;
          this.FILESPACE_NAME = filespace_name;
@@ -154,8 +154,8 @@ namespace DiskReporter {
       public long? CAPACITY { get; set; } //capacity in MB
       public double PCT_UTIL { get; set; }
       public DateTime LAST_BACKUP_END { get; set; }
-    }
-    public class TsmPlugin : IComPlugin {
+   }
+   public class TsmPlugin : IComPlugin {
       private Boolean externalDebug = false;
       [Required(ErrorMessage = "The plugin needs to be named", AllowEmptyStrings = false)]
       public string PluginName { get; set; }

@@ -150,7 +150,7 @@ namespace DiskReporter {
          VmGuests ourGuests = new VmGuests();
          T1 returnGuests = new T1();
 
-	     	foreach (Hashtable htable in hashtableList) {
+         foreach (Hashtable htable in hashtableList) {
             string host = (string)htable["VCENTER"];
             string domain = (string)htable["DOMAIN"];
             string username = (string)htable["USER"];
@@ -189,16 +189,16 @@ namespace DiskReporter {
          string currentDirectory = System.IO.Directory.GetCurrentDirectory();
 
          if (!System.Reflection.Assembly.LoadFrom("VMware.Vim.dll").GlobalAssemblyCache) { // not in gac
-               if (!System.IO.File.Exists(currentDirectory + System.IO.Path.DirectorySeparatorChar + "VMware.Vim.dll")) {
-                  allOK = false;
-                  outExceptions.Add(new Exception("Could load or find VMware.Vim.dll"));
-               }
+            if (!System.IO.File.Exists(currentDirectory + System.IO.Path.DirectorySeparatorChar + "VMware.Vim.dll")) {
+               allOK = false;
+               outExceptions.Add(new Exception("Could load or find VMware.Vim.dll"));
+            }
          }
          if (!System.Reflection.Assembly.LoadFrom("VMware.VimAutomation.Logging.SoapInterceptor.dll").GlobalAssemblyCache) { // not in gac
-               if (!System.IO.File.Exists(currentDirectory + System.IO.Path.DirectorySeparatorChar + "VMware.VimAutomation.Logging.SoapInterceptor.dll")) {
-                  allOK = false;
-                  outExceptions.Add(new Exception("Could load or find VMware.VimAutomation.Logging.SoapInterceptor.dll"));
-               }
+            if (!System.IO.File.Exists(currentDirectory + System.IO.Path.DirectorySeparatorChar + "VMware.VimAutomation.Logging.SoapInterceptor.dll")) {
+               allOK = false;
+               outExceptions.Add(new Exception("Could load or find VMware.VimAutomation.Logging.SoapInterceptor.dll"));
+            }
          }
          return allOK;
       }
