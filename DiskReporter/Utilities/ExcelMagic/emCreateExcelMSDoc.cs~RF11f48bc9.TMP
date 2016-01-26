@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Reflection;
 using Excel = Microsoft.Office.Interop.Excel; //Requires having Excel installed - not used in this version of the system
-//Build action in this document is set to none, because it is not used.
 
 namespace DiskReporter.Utilities.ExcelMagic {
    class CreateExcelMSDoc : ExcelDoc{

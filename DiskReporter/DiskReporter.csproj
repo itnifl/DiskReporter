@@ -40,8 +40,9 @@
     <StartupObject>DiskReporter.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="nunit.framework">
-      <HintPath>..\packages\NUnit.2.6.4\lib\nunit.framework.dll</HintPath>
+    <Reference Include="nunit.framework, Version=3.0.5813.39031, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
+      <HintPath>..\packages\NUnit.3.0.1\lib\net45\nunit.framework.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -82,13 +83,10 @@
     <Compile Include="Utilities\drMailMessage.cs" />
     <Compile Include="Utilities\drRegexUtilities.cs" />
     <Compile Include="Utilities\ExcelMagic\emCreateExcelDoc.cs" />
-    <Compile Include="Utilities\ExcelMagic\emCreateExcelMSDoc.cs" />
+    <None Include="Utilities\ExcelMagic\emCreateExcelMSDoc.cs" />
     <Compile Include="Utilities\ExcelMagic\emExcelDoc.cs" />
     <Compile Include="VmwareChatter\vcVMWareChatter.cs" />
     <Compile Include="VmwareChatter\vcXmlReader.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
@@ -98,8 +96,11 @@
   <Target Name="AfterBuild">
   </Target>
   -->
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
   <PropertyGroup>
-    <PostBuildEvent>"C:\Users\Atle\Documents\Visual Studio 2013\BatchFiles\AutoCopyDllFiles.bat"</PostBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
   </PropertyGroup>
 </Project>
