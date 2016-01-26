@@ -3,7 +3,7 @@ using System.Net.Mail;
 using System.Text;
 using System.Net.Mime;
 
-namespace DiskReporter {
+namespace DiskReporter.Utilities {
     public class ndrMailMessage {
         private MailMessage mailMessage = new MailMessage();
         private SmtpClient SmtpServer;

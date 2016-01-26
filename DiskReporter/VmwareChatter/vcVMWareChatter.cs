@@ -12,20 +12,21 @@ using DiskReporter;
 namespace VMWareChatter {
 	public class VCenterCommunicator {
 		VimClient vcli = new VimClient();
+      private Boolean externalDebug = false;
 	
-        /// <summary>
-        ///  Fetches all vmware guests, optionally filtered.
-        /// </summary>
-        /// <param name="hostName">The vCenter DNS hostname or IP-address it can be contacted by</param>
-        /// <param name="userName">Username as part of needed credential for access</param>
-        /// <param name="password">Password as part of needed credential for access</param>
-        /// <param name="domain">Domain as part of needed credential for access</param>
-        /// <param name="guestNameFilter">Name of guest that you want to fetch information about</param>
+      /// <summary>
+      ///  Fetches all vmware guests, optionally filtered.
+      /// </summary>
+      /// <param name="hostName">The vCenter DNS hostname or IP-address it can be contacted by</param>
+      /// <param name="userName">Username as part of needed credential for access</param>
+      /// <param name="password">Password as part of needed credential for access</param>
+      /// <param name="domain">Domain as part of needed credential for access</param>
+      /// <param name="guestNameFilter">Name of guest that you want to fetch information about</param>
 		public VmGuests GetVMServerInfo(String hostName, String userName, String password, String domain, String guestNameFilter) {
 			VmGuests guests = new VmGuests();
 
 			//For debugging we don't want to talk to any vCenter, we will create our own data to work with:
-			if (System.Diagnostics.Debugger.IsAttached) { 
+			if (System.Diagnostics.Debugger.IsAttached || externalDebug) { 
 				guests.Nodes = new List<VmGuest> {
 					new VmGuest("HUGO_N_APP01") { Name = "HUGO_S_APP01", 
 						PowerStatus = "PoweredOn", 
@@ -128,11 +129,11 @@ namespace VMWareChatter {
 				};
 			} else {
 				//Fetch information and collect them in a representative object:
-                //ServiceContent vcon =
-                vcli.Connect("https://" + hostName + "/sdk");
+            //ServiceContent vcon =
+            vcli.Connect("https://" + hostName + "/sdk");
 				if (!String.IsNullOrEmpty(domain)) userName = domain + "\\" + userName;
 				//UserSession vus = 
-                vcli.Login(userName, password);
+            vcli.Login(userName, password);
 				var filter = new NameValueCollection();
 				filter.Add("name", guestNameFilter);
 				IList<EntityViewBase> vms = vcli.FindEntityViews(typeof(VirtualMachine), null, filter, null);
@@ -150,13 +151,21 @@ namespace VMWareChatter {
 				}
 				vcli.Disconnect();
 			}
-			if(!String.IsNullOrEmpty(guestNameFilter)) return (VmGuests)guests.Nodes.Where(x => x.Name.Equals(guestNameFilter));
+         if (!String.IsNullOrEmpty(guestNameFilter)) {
+            var newGuests = guests.Nodes.Where(x => x.Name.Equals(guestNameFilter)).ToList();
+            VmGuests filteredGuests = new VmGuests();
+
+            foreach(var newGuest in newGuests) {
+               filteredGuests.AddNode(newGuest);
+            }
+            return filteredGuests; 
+         }
 			return guests;
 		}
-        /// <summary>
-        ///  Converts GuestDiskInfo to GeneralDisk that is general to any communication plugin that is used in this system.
-        /// </summary>
-        /// <param name="ourFromList">List of GuestDiskInfo to convert</param>
+      /// <summary>
+      ///  Converts GuestDiskInfo to GeneralDisk that is general to any communication plugin that is used in this system.
+      /// </summary>
+      /// <param name="ourFromList">List of GuestDiskInfo to convert</param>
 		private List<GeneralDisk> ConvertGuestDiskInfo(List<GuestDiskInfo> ourFromList) {
 			List<GeneralDisk> ourToList = new List<GeneralDisk>();
 			foreach(GuestDiskInfo disk in ourFromList) {

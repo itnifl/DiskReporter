@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;*/
 
 //This code is from http://dotnetfollower.com/wordpress/2012/03/c-simple-command-line-arguments-parser/
-namespace DiskReporter {
+namespace DiskReporter.Utilities {
    using System;
    using System.Collections.Generic;
 

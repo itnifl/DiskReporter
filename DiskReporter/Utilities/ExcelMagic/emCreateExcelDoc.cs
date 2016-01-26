@@ -5,7 +5,7 @@ using NPOI.HSSF.Util;
 using NPOI.SS.UserModel;
 using NPOI.SS.Util;
 
-namespace ExcelMagic {
+namespace DiskReporter.Utilities.ExcelMagic {
 	public class CreateExcelDoc : ExcelDoc {
 		HSSFWorkbook workbook = null;
 		ISheet worksheet = null;

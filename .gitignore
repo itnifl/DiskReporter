@@ -5,7 +5,7 @@
 *.suo
 *.user
 *.sln.docstates
-changes.log
+!changes.log
 
 # Build results
 
@@ -45,6 +45,7 @@ test-results/
 *.xls
 *.exe
 *.mdb
+*.vshost.exe.manifest
 
 # Visual C++ cache files
 ipch/

@@ -11,7 +11,7 @@ namespace DiskReporter {
         [Test()]
         public void TestCase() {
             string configDirectory = Directory.GetCurrentDirectory();
-            string tsmConfig = System.IO.Path.VolumeSeparatorChar + "config_vCenterServer.xml";
+            string tsmConfig = System.IO.Path.DirectorySeparatorChar + "config_vCenterServer.xml";
             List<Exception> exceptionList = new List<Exception>();
             StringBuilder sBuilder = new StringBuilder();
 

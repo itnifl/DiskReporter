@@ -14,7 +14,6 @@
     <TargetFrameworkProfile />
     <ProductVersion>12.0.0</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <StartupObject>DiskReporter.Program</StartupObject>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -37,7 +36,13 @@
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>DiskReporter.Program</StartupObject>
+  </PropertyGroup>
   <ItemGroup>
+    <Reference Include="nunit.framework">
+      <HintPath>..\packages\NUnit.2.6.4\lib\nunit.framework.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
@@ -59,9 +64,10 @@
       <HintPath>..\config&amp;Dependencies\NPOI.dll</HintPath>
     </Reference>
     <Reference Include="System.ComponentModel.DataAnnotations" />
-    <Reference Include="nunit.framework" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="drNodeEdgeIntegration.cs" />
+    <Compile Include="NUnitTests\TestNodeEdgeIntegration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="drInputArguments.cs" />
     <Compile Include="drMailMessage.cs" />
@@ -92,7 +98,8 @@
   <Target Name="AfterBuild">
   </Target>
   -->
-  <ItemGroup>
-    <Folder Include="NUnitTests\" />
-  </ItemGroup>
+  <ItemGroup />
+  <PropertyGroup>
+    <PostBuildEvent>"C:\Users\Atle\Documents\Visual Studio 2013\BatchFiles\AutoCopyDllFiles.bat"</PostBuildEvent>
+  </PropertyGroup>
 </Project>

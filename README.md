@@ -11,10 +11,13 @@ Prerequisites
 -------------
 For the full functionality of the code, the following prerequisites must be in order:
 
-	1. .Net 4.0
+	1. .Net 4.5
 	2. Configuration files 
 	3. TSM AdminClient(if you are not running in Debug mode)
 	4. [Kraggs.TSM.Utils](https://github.com/raggsokk/Kraggs.TSM.Utils)
+	
+Also NUnit with Monodevelop is being used, I have no experience if it might work or not out of the box if you are using some other IDE.
+In Visual Studio this can be fixed using Nuget and the command: Install-Package NUnit -Version 2.6.4
 
 * To fetch nodes from TSM, a TSM AdminClient needs to be installed.
 * Also for communication with TSM servers, [Kraggs.TSM.Utils](https://github.com/raggsokk/Kraggs.TSM.Utils) has to be a part of the project at compile time and placed with the executable when run.
