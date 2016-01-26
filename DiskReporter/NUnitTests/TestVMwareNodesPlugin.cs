@@ -22,7 +22,7 @@ namespace DiskReporter {
             Assert.AreEqual(0, exceptionList.Count, sBuilder.ToString());
             Assert.AreEqual(true, testResult, sBuilder.ToString());
             exceptionList.Clear();
-            VmGuests ourNodes = ourPlugin.GetAllNodesData<VmGuests, VmGuest>(configDirectory + tsmConfig, String.Empty, out exceptionList);
+            VmGuests ourNodes = ourPlugin.GetAllNodesData<VmGuests, VmGuest>(Path.Combine(configDirectory, tsmConfig), String.Empty, out exceptionList);
             Assert.IsNotNull(ourPlugin, "Expected ourNodes to be instantiated");
             Assert.Greater(ourNodes.Nodes.Count, 0, "Expected ourNodes to be instantiated with more then 0 nodes");
             sBuilder.Clear();
