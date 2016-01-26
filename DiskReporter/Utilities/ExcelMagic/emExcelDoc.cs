@@ -1,6 +1,6 @@
 using System;
 
-namespace ExcelMagic {
+namespace DiskReporter.Utilities.ExcelMagic {
     /// <summary>
     ///  Abstract class defining a class to create and handle Excel files. There can exist multiple versions of this class with possible future code in common, 
     /// therefore using it as abstract instead of interface.

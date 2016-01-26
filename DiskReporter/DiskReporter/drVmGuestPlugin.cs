@@ -11,12 +11,14 @@ namespace DiskReporter {
    public class VmGuests : IComNodeList<VmGuest> {
       public List<VmGuest> Nodes { get; set; }
       public IEnumerator<VmGuest> GetEnumerator() {
-         Nodes.Sort(delegate(VmGuest p1, VmGuest p2) {
-            return p1.Name.CompareTo(p2.Name);
-         });
-         foreach (VmGuest guest in Nodes) { 
-            yield return guest; 
-         } 
+         if(this.Nodes != null && this.Nodes.Count() > 0) {
+            Nodes.Sort(delegate (VmGuest p1, VmGuest p2) {
+               return p1.Name.CompareTo(p2.Name);
+            });
+            foreach (VmGuest guest in Nodes) {
+               yield return guest;
+            }
+         }        
       }
       public VmGuests() {
          this.Nodes = new List<VmGuest>();

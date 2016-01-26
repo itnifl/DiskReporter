@@ -2,7 +2,7 @@
 using System.Reflection;
 using Excel = Microsoft.Office.Interop.Excel; //Requires having Excel installed - not used in this version of the system
 
-namespace ExcelMagic {
+namespace DiskReporter.Utilities.ExcelMagic {
 	class CreateExcelMSDoc : ExcelDoc{
       private Excel.Application app = null;
       private Excel.Workbook workbook = null;

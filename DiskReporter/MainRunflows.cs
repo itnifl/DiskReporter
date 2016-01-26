@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
 using System.Reflection;
-using ExcelMagic;
+using DiskReporter.Utilities.ExcelMagic;
+using DiskReporter.Utilities;
 using VMWareChatter.XmlReader;
 
 namespace DiskReporter {

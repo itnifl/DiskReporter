@@ -30,10 +30,10 @@ namespace DiskReporter {
          List<Object> serverCollection = new List<Object>();
          Dictionary<string, long> totalStorageSum = new Dictionary<string, long>();         
          string relativePath = System.IO.Path.DirectorySeparatorChar + (String)rPath;
-         objectLogRelativePath = configDirectory + relativePath + System.IO.Path.DirectorySeparatorChar;
+         objectLogRelativePath = Path.Combine(configDirectory, relativePath);
 
-         if (!File.Exists(objectLogRelativePath + logName)) {
-            log = new StreamWriter(objectLogRelativePath + logName);
+         if (!File.Exists(Path.Combine(objectLogRelativePath, logName))) {
+            log = new StreamWriter(Path.Combine(objectLogRelativePath, logName));
          }
          else {
             //Create new file, and if so delete it afterwards:
@@ -45,49 +45,54 @@ namespace DiskReporter {
                log = new StreamWriter(objectLogRelativePath + logName);
             }
          }
-         OrderedDictionary vmwareNodeDictionary = new OrderedDictionary();
-         OrderedDictionary tsmNodeDictionary = new OrderedDictionary();
-         try {
-            DiskReporterMainRunFlows programFlow = new DiskReporterMainRunFlows(log);
-            var result = programFlow.FetchTsmVMwareNodeData(
-                  objectLogRelativePath + tsmConfig,
-                  objectLogRelativePath + vCenterConfig,
-               serverNameFilter: String.Empty);
-            vmwareNodeDictionary = result.Item1;
-            tsmNodeDictionary = result.Item2;
-         } catch (Exception ex) {
-            log.WriteLine(DateTime.Now + " - Error: " + ex.ToString());
-         }
+         return await Task.Run(() => {
+            OrderedDictionary vmwareNodeDictionary = new OrderedDictionary();
+            OrderedDictionary tsmNodeDictionary = new OrderedDictionary();
+            try {
+               DiskReporterMainRunFlows programFlow = new DiskReporterMainRunFlows(log);
+               var result = programFlow.FetchTsmVMwareNodeData(
+                     objectLogRelativePath + tsmConfig,
+                     objectLogRelativePath + vCenterConfig,
+                  serverNameFilter: String.Empty);
+               vmwareNodeDictionary = result.Item1;
+               tsmNodeDictionary = result.Item2;
+            }
+            catch (Exception ex) {
+               log.WriteLine(DateTime.Now + " - Error: " + ex.ToString());
+            }
 
-         try {
-            foreach (var key in vmwareNodeDictionary.Keys) {
-               if (!key.ToString().Equals("TotalCollectionStorage") && !key.ToString().Equals("TotalCollectionWindowsSystemStorage") && !key.ToString().Equals("TotalCollectionLinuxRootStorage")) serverCollection.Add(vmwareNodeDictionary[key]);
-               else if (!String.IsNullOrEmpty(key.ToString()) && !String.IsNullOrEmpty(vmwareNodeDictionary[key].ToString())) {
-                  totalStorageSum.Add(key.ToString(), Int64.Parse(vmwareNodeDictionary[key].ToString()));
+            try {
+               foreach (var key in vmwareNodeDictionary.Keys) {
+                  if (!key.ToString().Equals("TotalCollectionStorage") && !key.ToString().Equals("TotalCollectionWindowsSystemStorage") && !key.ToString().Equals("TotalCollectionLinuxRootStorage")) serverCollection.Add(vmwareNodeDictionary[key]);
+                  else if (!String.IsNullOrEmpty(key.ToString()) && !String.IsNullOrEmpty(vmwareNodeDictionary[key].ToString())) {
+                     totalStorageSum.Add(key.ToString(), Int64.Parse(vmwareNodeDictionary[key].ToString()));
+                  }
                }
             }
-         } catch (Exception ex) {
-            log.WriteLine(DateTime.Now + " - Error: " + ex.ToString());
-         }
-         try {
-            foreach (var key in tsmNodeDictionary.Keys) {
-               if (!key.ToString().Equals("TotalCollectionStorage") && !key.ToString().Equals("TotalCollectionWindowsSystemStorage") && !key.ToString().Equals("TotalCollectionLinuxRootStorage")) {
-                  serverCollection.Add(tsmNodeDictionary[key]);
-               }
-               else if (key.ToString().Equals("TotalCollectionStorage")) {
-                  totalStorageSum = HandleListStorageData("TotalCollectionStorage", totalStorageSum, tsmNodeDictionary);
-               }
-               else if (key.ToString().Equals("TotalCollectionWindowsSystemStorage")) {
-                  totalStorageSum = HandleListStorageData("TotalCollectionWindowsSystemStorage", totalStorageSum, tsmNodeDictionary);
-               }
-               else if (key.ToString().Equals("TotalCollectionLinuxRootStorage")) {
-                  totalStorageSum = HandleListStorageData("TotalCollectionLinuxRootStorage", totalStorageSum, tsmNodeDictionary);
+            catch (Exception ex) {
+               log.WriteLine(DateTime.Now + " - Error: " + ex.ToString());
+            }
+            try {
+               foreach (var key in tsmNodeDictionary.Keys) {
+                  if (!key.ToString().Equals("TotalCollectionStorage") && !key.ToString().Equals("TotalCollectionWindowsSystemStorage") && !key.ToString().Equals("TotalCollectionLinuxRootStorage")) {
+                     serverCollection.Add(tsmNodeDictionary[key]);
+                  }
+                  else if (key.ToString().Equals("TotalCollectionStorage")) {
+                     totalStorageSum = HandleListStorageData("TotalCollectionStorage", totalStorageSum, tsmNodeDictionary);
+                  }
+                  else if (key.ToString().Equals("TotalCollectionWindowsSystemStorage")) {
+                     totalStorageSum = HandleListStorageData("TotalCollectionWindowsSystemStorage", totalStorageSum, tsmNodeDictionary);
+                  }
+                  else if (key.ToString().Equals("TotalCollectionLinuxRootStorage")) {
+                     totalStorageSum = HandleListStorageData("TotalCollectionLinuxRootStorage", totalStorageSum, tsmNodeDictionary);
+                  }
                }
             }
-         } catch (Exception ex) {
-            log.WriteLine(DateTime.Now + " - Error: " + ex.ToString());
-         }
-         return new { ServerCollection = serverCollection, TotalStorage = totalStorageSum };
+            catch (Exception ex) {
+               log.WriteLine(DateTime.Now + " - Error: " + ex.ToString());
+            }
+            return new { ServerCollection = serverCollection, TotalStorage = totalStorageSum };
+         });
       }
       private Dictionary<string, long> HandleListStorageData(string key, Dictionary<string, long> pairList, OrderedDictionary itemDictionary) {
          var totalStorage = pairList.FirstOrDefault(x => x.Key == key);

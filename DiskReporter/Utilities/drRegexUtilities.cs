@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Net.Mail;
 
-namespace DiskReporter {
+namespace DiskReporter.Utilities {
    class MailValidator {
         /// <summary>
         ///  Validates a mail address
