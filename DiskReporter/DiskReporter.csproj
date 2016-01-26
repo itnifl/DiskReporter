@@ -66,29 +66,29 @@
     <Reference Include="System.ComponentModel.DataAnnotations" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="drNodeEdgeIntegration.cs" />
+    <Compile Include="DiskReporter\drNodeEdgeIntegration.cs" />
+    <Compile Include="DiskReporter\drTsmNodesPlugin.cs" />
+    <Compile Include="DiskReporter\drVmGuestPlugin.cs" />
+    <Compile Include="Interfaces\drInterfaces.cs" />
+    <Compile Include="MainRunflows.cs" />
     <Compile Include="NUnitTests\TestNodeEdgeIntegration.cs" />
+    <Compile Include="Plugin\drComPluginList.cs" />
+    <Compile Include="Plugin\drPluginGenerics.cs" />
+    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="drInputArguments.cs" />
-    <Compile Include="drMailMessage.cs" />
-    <Compile Include="drMainRunflows.cs" />
-    <Compile Include="drRegexUtilities.cs" />
-    <Compile Include="vcXmlReader.cs" />
-    <Compile Include="vcVMWareChatter.cs" />
-    <Compile Include="emExcelDoc.cs" />
-    <Compile Include="emCreateExcelDoc.cs" />
-    <Compile Include="drProgram.cs" />
-    <Compile Include="drInterfaces.cs" />
-    <Compile Include="drTsmNodesPlugin.cs" />
-    <Compile Include="drVmGuestPlugin.cs" />
-    <Compile Include="drComPluginList.cs" />
-    <Compile Include="drPluginGenerics.cs" />
     <Compile Include="NUnitTests\TestTsmNodesPlugin.cs" />
     <Compile Include="NUnitTests\TestVMwareNodesPlugin.cs" />
+    <Compile Include="Utilities\drInputArguments.cs" />
+    <Compile Include="Utilities\drMailMessage.cs" />
+    <Compile Include="Utilities\drRegexUtilities.cs" />
+    <Compile Include="Utilities\ExcelMagic\emCreateExcelDoc.cs" />
+    <Compile Include="Utilities\ExcelMagic\emCreateExcelMSDoc.cs" />
+    <Compile Include="Utilities\ExcelMagic\emExcelDoc.cs" />
+    <Compile Include="VmwareChatter\vcVMWareChatter.cs" />
+    <Compile Include="VmwareChatter\vcXmlReader.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="emCreateExcelMSDoc.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

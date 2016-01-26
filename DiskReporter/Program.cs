@@ -50,8 +50,8 @@ namespace DiskReporter {
          } else if (!String.IsNullOrEmpty(arguments["-mailReport"]) && !String.IsNullOrEmpty(arguments["-mailReport"])) {
 	         string mailReceiver = MailValidator.IsValid(arguments["-mailReport"]) ? arguments["-mailReport"] : "";
 	         if (!String.IsNullOrEmpty(mailReceiver)) {
-		         runStatus = programFlow.MailReport(!String.IsNullOrEmpty(arguments["-tsm"]) ? configDirectory + tsmConfig : String.Empty,
-					                                    !String.IsNullOrEmpty(arguments["-vmware"]) ? configDirectory + vCenterConfig : String.Empty,
+		         runStatus = programFlow.MailReport(!String.IsNullOrEmpty(arguments["-tsm"]) ? Path.Combine(configDirectory, tsmConfig) : String.Empty,
+					                                    !String.IsNullOrEmpty(arguments["-vmware"]) ? Path.Combine(configDirectory, vCenterConfig) : String.Empty,
 					                                    mailReceiver);
 	         } else {
 		         DisplayHelpMenu();
@@ -59,8 +59,8 @@ namespace DiskReporter {
          } else {
 	         string serverName = !String.IsNullOrEmpty(arguments["-server"]) ? arguments["-server"] : String.Empty;
                   var result = programFlow.FetchTsmVMwareNodeData(
-                     !String.IsNullOrEmpty(arguments["-tsm"]) ? configDirectory + tsmConfig : String.Empty,
-                     !String.IsNullOrEmpty(arguments["-vmware"]) ? configDirectory + vCenterConfig : String.Empty, 
+                     !String.IsNullOrEmpty(arguments["-tsm"]) ? Path.Combine(configDirectory, tsmConfig) : String.Empty,
+                     !String.IsNullOrEmpty(arguments["-vmware"]) ? Path.Combine(configDirectory, vCenterConfig) : String.Empty, 
 		         serverNameFilter: serverName);
 
 	         System.Collections.Specialized.OrderedDictionary vmwareNodeDictionary = result.Item1;
