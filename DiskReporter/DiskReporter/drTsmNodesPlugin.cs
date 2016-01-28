@@ -8,9 +8,10 @@ using Kraggs.TSM;
 using Kraggs.TSM.Utils;
 using DiskReporter.PluginContracts;
 using VMWareChatter.XmlReader;
+using System.Collections.Specialized;
 
 namespace DiskReporter {
-   class TsmNodes : IComNodeList<TsmNode> {
+   class TsmNodes : IReporterNodeList<TsmNode> {
       public List<TsmNode> Nodes { get; set; }
       public TsmNodes() {
          Nodes = new List<TsmNode>();
@@ -19,12 +20,14 @@ namespace DiskReporter {
          Nodes.Add(node);     
       }
       public IEnumerator<TsmNode> GetEnumerator() {
-         Nodes.Sort(delegate(TsmNode p1, TsmNode p2) {
+         if(Nodes != null && Nodes.Count() > 0) {
+            Nodes.Sort(delegate (TsmNode p1, TsmNode p2) {
                return p1.Name.CompareTo(p2.Name);
-         });
-         foreach (TsmNode tsmNode in Nodes) {
+            });
+            foreach (TsmNode tsmNode in Nodes) {
                yield return tsmNode;
-         }
+            }
+         }         
       }
       /// <summary>
       ///  Gets the total storage space of all disks registered on all nodes.
@@ -60,7 +63,7 @@ namespace DiskReporter {
          return totalStorage;
       }
    }
-   class TsmNode : IComNode {
+   class TsmNode : IReporterNode {
       public string Name { get; set; }
       public List<GeneralDisk> Disks { get; set; }
       public long? TotalStorage { get; set; }
@@ -155,7 +158,32 @@ namespace DiskReporter {
       public double PCT_UTIL { get; set; }
       public DateTime LAST_BACKUP_END { get; set; }
    }
-   public class TsmPlugin : IComPlugin {
+   /// <summary>
+   /// Console command that can be executed against this plugin and delegates to methods that do the work
+   /// </summary>
+   public class TSMPluginCommand : IReporterCommand {
+      public TSMPluginCommand(string Command, string Description, Func<String, OrderedDictionary> ExecuteCommand) {
+         this.Command = Command;
+         this.ExecuteCommand = ExecuteCommand;
+         this.Description = Description;
+      }
+      public string Command { get; set; }
+      public string Description { get; set; }
+      public Func<String, OrderedDictionary> ExecuteCommand { get; set; }
+   }
+   /// <summary>
+   /// Console commands that can be executed against this plugin and delegates to methods that do the work
+   /// </summary>
+   public class TSMPluginCommands : IReporterCommands<TSMPluginCommand> {
+      public TSMPluginCommands(List<TSMPluginCommand> Commands) {
+         this.Commands = Commands;
+      }
+      public TSMPluginCommands() {
+         this.Commands = new List<TSMPluginCommand>();
+      }
+      public List<TSMPluginCommand> Commands { get; set; }
+   }
+   public class TsmPlugin : IReporterPlugin {
       private Boolean externalDebug = false;
       [Required(ErrorMessage = "The plugin needs to be named", AllowEmptyStrings = false)]
       public string PluginName { get; set; }
@@ -173,11 +201,20 @@ namespace DiskReporter {
       *    for full functionality,
       *      works for testing in debug mode.
       */
-
+      /// <summary>
+      /// Collection of commands that this plugin can execute, these commands can be set here.
+      /// </summary>
+      public TSMPluginCommands PluginCommands { private get; set; }
+      /// <summary>
+      /// Commands that can be executed against this plugin and delegates to methods that do the work
+      /// </summary>
+      public IReporterCommands<T> GetCommands<T>() where T : IReporterCommand, new() {
+         return (IReporterCommands<T>)PluginCommands;
+      }
       public TsmPlugin(string pluginName) {
          this.PluginName = pluginName;
       }
-      public IComPlugin GetPlugin() {
+      public IReporterPlugin GetPlugin() {
          return this;
       }
       /// <summary>
@@ -187,8 +224,8 @@ namespace DiskReporter {
       /// <param name="nameFilter">The name of the node we want to filter out from the results.</param>
       /// <param name="outExceptions">List of exceptions that we can examine after the code completes</param>
       public T1 GetAllNodesData<T1, T2>(String sourceConfigFileName, string nameFilter, out List<Exception> outExceptions)
-         where T1 : IComNodeList<T2>, new() 
-               where T2 : IComNode, new() 
+         where T1 : IReporterNodeList<T2>, new() 
+               where T2 : IReporterNode, new() 
       {
          XmlReaderLocal tsmServersConfigReader = new XmlReaderLocal(sourceConfigFileName);
          List<Hashtable> hashtableList = tsmServersConfigReader.ReadAllServers();

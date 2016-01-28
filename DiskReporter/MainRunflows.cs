@@ -23,17 +23,17 @@ namespace DiskReporter {
       String logFilename;
       private ComPluginList ourCommunicationPlugins;
 
-      public DiskReporterMainRunFlows(StreamWriter log) {
+      public DiskReporterMainRunFlows(StreamWriter log, ComPluginList newPluginList) {
          this.log = log;
          logFilename = ((FileStream)(log.BaseStream)).Name;
-         this.ourCommunicationPlugins = new ComPluginList();
+         this.ourCommunicationPlugins = newPluginList;
       }
-      public DiskReporterMainRunFlows(StreamWriter log, String configDirectory) {
+      public DiskReporterMainRunFlows(StreamWriter log, String configDirectory, ComPluginList newPluginList) {
          this.log = log;
          this.ConfigDirectory = configDirectory;
          if (!configDirectory[configDirectory.Length - 1].Equals("\\")) configDirectory += "\\";
          logFilename = ((FileStream)(log.BaseStream)).Name;
-         this.ourCommunicationPlugins = new ComPluginList();
+         this.ourCommunicationPlugins = newPluginList;
          //Now we check if there are any prerequisites missing to our plugins and warn to error log and console if there is:
          var result = this.ourCommunicationPlugins.VerifyAllRegisteredPlugins();
          bool pluginStatus = result.Item1;
@@ -123,38 +123,43 @@ namespace DiskReporter {
          List<Exception> vmExceptions = new List<Exception>();
 
          //We are not looking for anything in the vCenter if a configuration for the vCenter server is not specified:
-         if (!String.IsNullOrEmpty (vCenterConfig)) {
+         if (!String.IsNullOrEmpty(vCenterConfig) && File.Exists(vCenterConfig)) {
             try {
                VmPlugin vMwarePlugin = (VmPlugin)ourCommunicationPlugins.ComPlugins.Find(x => x.PluginName.ToUpper().Equals("VMWARE"));
                VmGuests vmGuests = vMwarePlugin.GetAllNodesData<VmGuests, VmGuest>(vCenterConfig, serverNameFilter, out vmExceptions);
-               if (String.IsNullOrEmpty (serverNameFilter))
+               if (String.IsNullOrEmpty(serverNameFilter))
                   vmwareNodeDictionary.Add("TotalCollectionStorage", vmGuests.GetTotalStorage(0));
-               if (String.IsNullOrEmpty (serverNameFilter))
+               if (String.IsNullOrEmpty(serverNameFilter))
                   vmwareNodeDictionary.Add("TotalCollectionWindowsSystemStorage", vmGuests.GetTotalWindowsSystemStorage(0));
-               if (String.IsNullOrEmpty (serverNameFilter))
+               if (String.IsNullOrEmpty(serverNameFilter))
                   vmwareNodeDictionary.Add("TotalCollectionLinuxRootStorage", vmGuests.GetTotalLinuxRootStorage(0));
                foreach (VmGuest vmGuest in vmGuests) {
-                  String nodename = vmGuest.Name.Contains(".") ? vmGuest.Name.Split('.') [0].ToUpper() : vmGuest.Name.ToUpper();
+                  String nodename = vmGuest.Name.Contains(".") ? vmGuest.Name.Split('.')[0].ToUpper() : vmGuest.Name.ToUpper();
                   if (!String.IsNullOrEmpty(nodename) && !vmwareNodeDictionary.Contains(nodename)) {
                      try {
-                        if(!vmGuest.TotalStorage.HasValue) vmGuest.TotalStorage = vmGuest.GetTotalStorageSpace();
-                        if(!vmGuest.TotalSystemStorage.HasValue) vmGuest.TotalSystemStorage = vmGuest.GetSystemDisk().Capacity;
-            	         vmwareNodeDictionary.Add(nodename, vmGuest);
-                     } catch (Exception e) {
-            	         DisplayException (e);
-            	         continue;
+                        if (!vmGuest.TotalStorage.HasValue) vmGuest.TotalStorage = vmGuest.GetTotalStorageSpace();
+                        if (!vmGuest.TotalSystemStorage.HasValue) vmGuest.TotalSystemStorage = vmGuest.GetSystemDisk().Capacity;
+                        vmwareNodeDictionary.Add(nodename, vmGuest);
+                     }
+                     catch (Exception e) {
+                        DisplayException(e);
+                        continue;
                      }
                   }
                }
-            } catch (Exception e) {
+            }
+            catch (Exception e) {
                DisplayException(e);
             }
+         }
+         else {
+            throw new FileNotFoundException("File not found: '" + vCenterConfig + "'");
          }
          foreach (Exception e in vmExceptions) {
             DisplayException(e);
          }
          //We are not looking for anything on the TSM side if a configuration for the TSM servers are not specified:
-         if (!String.IsNullOrEmpty (tsmServersConfig)) {
+         if (!String.IsNullOrEmpty (tsmServersConfig) && File.Exists(tsmServersConfig)) {
             //If we requested only one server and that server is already found in vmware, then look no further:
             if (String.IsNullOrEmpty(serverNameFilter) || (!String.IsNullOrEmpty(serverNameFilter) && vmwareNodeDictionary.Count == 0)) { 
                List<Exception> tsmExceptions = new List<Exception>();
@@ -186,6 +191,8 @@ namespace DiskReporter {
                   DisplayException(e);
                }
             }
+         } else {
+            throw new FileNotFoundException("File not found: '" + tsmServersConfig + "'");
          }
          return Tuple.Create(vmwareNodeDictionary, tsmNodeDictionary);
       }

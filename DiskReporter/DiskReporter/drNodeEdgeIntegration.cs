@@ -26,6 +26,7 @@ namespace DiskReporter {
       /// <returns>{ ServerCollection = serverCollection, TotalStorage = totalStorageSum }</returns>
       /// <param name="rPath">String representing the path that the XML configuration is in under</param>
       public async Task<object> FetchVMwareAndTSMServerData(dynamic rPath) {
+         ComPluginList ourCommunicationPlugins = new ComPluginList();
          StreamWriter log;
          List<Object> serverCollection = new List<Object>();
          Dictionary<string, long> totalStorageSum = new Dictionary<string, long>();         
@@ -49,7 +50,7 @@ namespace DiskReporter {
             OrderedDictionary vmwareNodeDictionary = new OrderedDictionary();
             OrderedDictionary tsmNodeDictionary = new OrderedDictionary();
             try {
-               DiskReporterMainRunFlows programFlow = new DiskReporterMainRunFlows(log);
+               DiskReporterMainRunFlows programFlow = new DiskReporterMainRunFlows(log, ourCommunicationPlugins);
                var result = programFlow.FetchTsmVMwareNodeData(
                      objectLogRelativePath + tsmConfig,
                      objectLogRelativePath + vCenterConfig,

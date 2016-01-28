@@ -1,12 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Collections.Specialized;
 
 namespace DiskReporter.PluginContracts {
    /// <summary>
    /// Represents a list of nodes returned by the plugin
    /// </summary>
-	public interface IComNodeList<T> where T : IComNode, new() {	
+	public interface IReporterNodeList<T> where T : IReporterNode, new() {	
 		List<T> Nodes { get; set; }
 
 		void AddNode(T node);
@@ -18,7 +19,7 @@ namespace DiskReporter.PluginContracts {
    /// <summary>
    /// Represents a node in a list of nodes returned by a plugin
    /// </summary>
-	public interface IComNode {	
+	public interface IReporterNode {	
       string Name { get; set; }
       List<GeneralDisk> Disks { get; set; }
       long? TotalStorage { get; set; }
@@ -37,12 +38,12 @@ namespace DiskReporter.PluginContracts {
    /// <summary>
    /// Represents a list of plugins
    /// </summary>
-	public interface IComPluginList {
-      List<IComPlugin> ComPlugins { get; set; }
+	public interface IReporterPluginList {
+      List<IReporterPlugin> ComPlugins { get; set; }
 
-      IEnumerator<IComPlugin> GetEnumerator();
+      IEnumerator<IReporterPlugin> GetEnumerator();
       Tuple<bool, string[]> VerifyAllRegisteredPlugins();
-      bool RegisterPlugin(IComPlugin plugin);
+      bool RegisterPlugin(IReporterPlugin plugin);
       bool RemovePlugin(string pluginName);
       string[] GetAllPluginNames();
       void LoadAllPlugins();
@@ -50,7 +51,7 @@ namespace DiskReporter.PluginContracts {
    /// <summary>
    /// Represents a plugin
    /// </summary>
-   public interface IComPlugin {	
+   public interface IReporterPlugin {
       [Required(ErrorMessage = "The plugin needs to be named", AllowEmptyStrings = false)]
       string PluginName { get; set; }
       /// <summary>
@@ -63,14 +64,30 @@ namespace DiskReporter.PluginContracts {
       /// </summary>
       [Required(ErrorMessage = "Type of node object is required")]
       Type NodeObjectType { get; set;}
-
-      IComPlugin GetPlugin();
       /// <summary>
-      /// Retrieves all nodes where T1 is the list(IComNodeList) of nodes(IComNode) and T2 is the node(IComNode).
+      /// Get all console commands this plugin offers
+      /// </summary>
+      /// <returns>Lst of commands that implement IReporterCommand</returns>
+      IReporterCommands<T> GetCommands<T>() where T : IReporterCommand, new(); 
+      /// <summary>
+      /// Retrieves the plugin
+      /// </summary>
+      /// <returns>A plugin that implements IReporterPlugin</returns>
+      IReporterPlugin GetPlugin();
+      /// <summary>
+      /// Retrieves all nodes where T1 is the list(IReporterNodeList) of nodes(IReporterNode) and T2 is the node(IReporterNode).
       /// </summary>
       T1 GetAllNodesData<T1, T2>(String sourceConfigFileName, string nameFilter, out List<Exception> outExceptions) 
-         where T1 : IComNodeList<T2>, new()
-	         where T2 : IComNode, new();
+         where T1 : IReporterNodeList<T2>, new()
+	         where T2 : IReporterNode, new();
       bool CheckPrerequisites(out List<Exception> outExceptions);
+   }
+   public interface IReporterCommand {
+      string Command { get; set; }
+      string Description { get; set; }
+      Func<String, OrderedDictionary> ExecuteCommand { get; set; }
+   }
+   public interface IReporterCommands<T> where T : IReporterCommand {
+      List<T> Commands { get; set; }
    }
 }

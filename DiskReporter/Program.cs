@@ -1,14 +1,44 @@
 ﻿using System;
 using System.IO;
 using DiskReporter.Utilities;
-
+using System.Collections.Generic;
+using System.Collections.Specialized;
+/* Todo:
+   1. Put code to execute actions into the respective PluginCommands.
+   2. Set up autopopulation of menu and display of what is auto populated.
+   3. Set up parsing and execution of possible menu commands.
+*/
 namespace DiskReporter {
    class Program {
       static string configDirectory = Directory.GetCurrentDirectory();
-      static string tsmConfig = System.IO.Path.DirectorySeparatorChar + "config_TSMServers.xml";
-      static string vCenterConfig = System.IO.Path.DirectorySeparatorChar + "config_vCenterServer.xml";         
+      static string tsmConfig = "config_TSMServers.xml";
+      static string vCenterConfig = "config_vCenterServer.xml";         
       static string logName = "DiskReporter.log";
+      static ComPluginList ourCommunicationPlugins = new ComPluginList();
 
+      /// <summary>
+      /// Here we manually populate the possible commands to our plugins
+      /// </summary>
+      static void PopulateMenu() {
+         ourCommunicationPlugins.LoadAllPlugins();
+         VmPlugin vMwarePlugin = (VmPlugin)ourCommunicationPlugins.ComPlugins.Find(x => x.PluginName.ToUpper().Equals("VMWARE"));
+         TsmPlugin TsmPlugin = (TsmPlugin)ourCommunicationPlugins.ComPlugins.Find(x => x.PluginName.ToUpper().Equals("TSM"));
+
+         vMwarePlugin.PluginCommands = new VmPluginCommands(
+               new List<VmPluginCommand>() {
+                  new VmPluginCommand("-vmware", "To fetch disk info from VMware", (string servername) => {
+                     return new OrderedDictionary();
+                  })
+               }
+            );
+         TsmPlugin.PluginCommands = new TSMPluginCommands(
+               new List<TSMPluginCommand>() {
+                  new TSMPluginCommand("-tsm", "To fetch disk info from TSM", (string servername) => {
+                     return new OrderedDictionary();
+                  })
+               }
+            );
+      }
       /// <summary>
       ///  Displays the help menu
       /// </summary>
@@ -18,8 +48,6 @@ namespace DiskReporter {
          Console.WriteLine ("");
          Console.WriteLine ("Possible command options:");
          Console.WriteLine ("    -mailReport someGuy@someDomain.com - optional");
-         Console.WriteLine ("    -tsm - to only info fetch from TSM - optional");
-         Console.WriteLine ("    -vmware - to only info fetch from VMware - optional");
          Console.WriteLine ("    -server - serverName to get info about in VMWare ot TSM - optional");
          Console.WriteLine ("    -excel - pipe result to XML - optional");
          Console.WriteLine ("    -help - to show this screen");
@@ -37,11 +65,8 @@ namespace DiskReporter {
          } else {
 	         log = File.AppendText(logName);
          }
-         //drNodeEdgeIntegration test = new drNodeEdgeIntegration();
-         //Object dataReturns = test.FetchVMwareAndTSMServerData(String.Empty);
-         DiskReporterMainRunFlows programFlow = new DiskReporterMainRunFlows(log);
-         //Console.WriteLine("Using: " + configDirectory + tsmConfig);
-         //Console.WriteLine("Using: " + configDirectory + vCenterConfig);
+         DiskReporterMainRunFlows programFlow = new DiskReporterMainRunFlows(log, ourCommunicationPlugins);
+
          if(String.IsNullOrEmpty(arguments["-tsm"]) && String.IsNullOrEmpty(arguments["-vmware"])) {
 	         arguments.AddInputArguments (new[] {"-tsm","-vmware"});
          }
@@ -104,7 +129,7 @@ namespace DiskReporter {
 	         }
          }
          log.Close();
-         //Console.ReadLine();
+         Console.ReadLine();
          if (runStatus) {
 	         Environment.Exit(0);
          } else {

@@ -28,7 +28,7 @@ namespace VMWareChatter {
 			//For debugging we don't want to talk to any vCenter, we will create our own data to work with:
 			if (System.Diagnostics.Debugger.IsAttached || externalDebug) { 
 				guests.Nodes = new List<VmGuest> {
-					new VmGuest("HUGO_N_APP01") { Name = "HUGO_S_APP01", 
+					new VmGuest("HUGO_S_APP01") { Name = "HUGO_S_APP01", 
 						PowerStatus = "PoweredOn", 
 						IP = "192.168.1.80",  
 						Disks = new List<GeneralDisk>(){

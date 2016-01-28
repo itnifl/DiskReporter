@@ -6,9 +6,11 @@ using System.Linq;
 using DiskReporter.PluginContracts;
 using VMWareChatter;
 using VMWareChatter.XmlReader;
+using System.IO;
+using System.Collections.Specialized;
 
 namespace DiskReporter {
-   public class VmGuests : IComNodeList<VmGuest> {
+   public class VmGuests : IReporterNodeList<VmGuest> {
       public List<VmGuest> Nodes { get; set; }
       public IEnumerator<VmGuest> GetEnumerator() {
          if(this.Nodes != null && this.Nodes.Count() > 0) {
@@ -60,7 +62,7 @@ namespace DiskReporter {
          return totalStorage;
       }
    }
-   public class VmGuest : IComNode {
+   public class VmGuest : IReporterNode {
       public string Name { get; set; }
       public string PowerStatus { get; set; }
       public string IP { get; set; }
@@ -109,7 +111,32 @@ namespace DiskReporter {
          return returnDisk;
       }
    }
-   class VmPlugin : IComPlugin {
+   /// <summary>
+   /// Console command that can be executed against this plugin and delegates to methods that do the work
+   /// </summary>
+   public class VmPluginCommand : IReporterCommand {
+      public VmPluginCommand(string Command, string Description, Func<String, OrderedDictionary> ExecuteCommand) {
+         this.Command = Command;
+         this.ExecuteCommand = ExecuteCommand;
+         this.Description = Description;
+      }
+      public string Description { get; set; }
+      public string Command { get; set; }
+      public Func<String, OrderedDictionary> ExecuteCommand { get; set; }
+   }
+   /// <summary>
+   /// Console commands that can be executed against this plugin and delegates to methods that do the work
+   /// </summary>
+   public class VmPluginCommands : IReporterCommands<VmPluginCommand> {
+      public VmPluginCommands(List<VmPluginCommand> commands) {
+         this.Commands = commands;
+      }
+      public VmPluginCommands() {
+         this.Commands = new List<VmPluginCommand>();
+      }
+      public List<VmPluginCommand> Commands { get; set; }
+   }
+   class VmPlugin : IReporterPlugin {
       [Required(ErrorMessage = "The plugin needs to be named", AllowEmptyStrings = false)]
       public string PluginName { get; set;}
       /// <summary>
@@ -122,18 +149,27 @@ namespace DiskReporter {
       /// </summary>
       [Required(ErrorMessage = "Type of node object is required")]
       public Type NodeObjectType { get; set;}
-     /*  Requires VMware.Vim.dll
-      *  Requires VMware.VimAutomation.Logging.SoapInterceptor.dll
-      *  These should be checked if are available either in local folder or in GAC
-      */
-
+      /*  Requires VMware.Vim.dll
+       *  Requires VMware.VimAutomation.Logging.SoapInterceptor.dll
+       *  These should be checked if are available either in local folder or in GAC
+       */
+       /// <summary>
+       /// Collection of commands that this plugin can execute:
+       /// </summary>
+      public VmPluginCommands PluginCommands { private get; set; }
+      /// <summary>
+      /// Console commands that can be executed against this plugin and delegates to methods that do the work
+      /// </summary>
+      public IReporterCommands<T> GetCommands<T> () where T : IReporterCommand, new() {
+         return (IReporterCommands<T>)PluginCommands;
+      }
       public VmPlugin(string pluginName) {
 			this.PluginName = pluginName;
 		}
       /// <summary>
       ///  Retrieves a reference to the object itself
       /// </summary>
-		public IComPlugin GetPlugin() {
+		public IReporterPlugin GetPlugin() {
 			return this;
 		}
       /// <summary>
@@ -142,8 +178,8 @@ namespace DiskReporter {
       /// <param name="sourceConfigFileName">XML configuration file that describes needed information for fetching VMWare guest data</param>
       /// <param name="nameFilter">The name of the virtual guest we want to filter out from the results</param>
       /// <param name="outExceptions">List of exceptions that we can examine after the code completes</param>
-		public T1 GetAllNodesData<T1, T2>(string sourceConfigFileName, string nameFilter, out List<Exception> outExceptions) where T1 : IComNodeList<T2>, new() 
-			where T2 : IComNode, new()
+		public T1 GetAllNodesData<T1, T2>(string sourceConfigFileName, string nameFilter, out List<Exception> outExceptions) where T1 : IReporterNodeList<T2>, new() 
+			where T2 : IReporterNode, new()
 		{
          VCenterCommunicator vCom = new VCenterCommunicator ();
          XmlReaderLocal vmConfigReader = new XmlReaderLocal(sourceConfigFileName);
@@ -191,13 +227,13 @@ namespace DiskReporter {
          string currentDirectory = System.IO.Directory.GetCurrentDirectory();
 
          if (!System.Reflection.Assembly.LoadFrom("VMware.Vim.dll").GlobalAssemblyCache) { // not in gac
-            if (!System.IO.File.Exists(currentDirectory + System.IO.Path.DirectorySeparatorChar + "VMware.Vim.dll")) {
+            if (!System.IO.File.Exists(Path.Combine(currentDirectory, "VMware.Vim.dll"))) {
                allOK = false;
                outExceptions.Add(new Exception("Could load or find VMware.Vim.dll"));
             }
          }
          if (!System.Reflection.Assembly.LoadFrom("VMware.VimAutomation.Logging.SoapInterceptor.dll").GlobalAssemblyCache) { // not in gac
-            if (!System.IO.File.Exists(currentDirectory + System.IO.Path.DirectorySeparatorChar + "VMware.VimAutomation.Logging.SoapInterceptor.dll")) {
+            if (!System.IO.File.Exists(Path.Combine(currentDirectory, "VMware.VimAutomation.Logging.SoapInterceptor.dll"))) {
                allOK = false;
                outExceptions.Add(new Exception("Could load or find VMware.VimAutomation.Logging.SoapInterceptor.dll"));
             }
