@@ -181,7 +181,7 @@ namespace DiskReporter {
 		public T1 GetAllNodesData<T1, T2>(string sourceConfigFileName, string nameFilter, out List<Exception> outExceptions) where T1 : IReporterNodeList<T2>, new() 
 			where T2 : IReporterNode, new()
 		{
-         VCenterCommunicator vCom = new VCenterCommunicator ();
+         VCenterCommunicator vCom = null;
          XmlReaderLocal vmConfigReader = new XmlReaderLocal(sourceConfigFileName);
          List<Hashtable> hashtableList = vmConfigReader.ReadAllServers();
          List<Exception> loopExceptions = new List<Exception>();
@@ -193,9 +193,10 @@ namespace DiskReporter {
             string domain = (string)htable["DOMAIN"];
             string username = (string)htable["USER"];
             string password = (string)htable["PASSWORD"];
+            vCom = new VCenterCommunicator(host, username, password, domain);
 
-	        	try {
-					ourGuests = vCom.GetVMServerInfo(host, username, password, domain, nameFilter);
+            try {
+					ourGuests = vCom.GetVMServerInfo(nameFilter);
 	        	} catch (Exception e) {
 					loopExceptions.Add(e);
 	        	}

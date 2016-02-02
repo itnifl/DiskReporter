@@ -46,7 +46,7 @@ namespace DiskReporter.PluginContracts {
       bool RegisterPlugin(IReporterPlugin plugin);
       bool RemovePlugin(string pluginName);
       string[] GetAllPluginNames();
-      void LoadAllPlugins();
+      void LoadAllPlugins(bool force);
 	}
    /// <summary>
    /// Represents a plugin

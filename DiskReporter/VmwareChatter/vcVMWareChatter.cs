@@ -10,10 +10,34 @@ using DiskReporter;
  *  Requires VMware.VimAutomation.Logging.SoapInterceptor.dll
  */
 namespace VMWareChatter {
-	public class VCenterCommunicator {
-		VimClient vcli = new VimClient();
+	public class VCenterCommunicator : IDisposable {		
       private Boolean externalDebug = false;
-	
+      VimClient vSphereClient = new VimClient();
+      /// <summary>
+      /// Used to talk to and automate an ESXi environment
+      /// </summary>
+      /// <param name="hostName">The vCenter DNS hostname or IP-address it can be contacted by</param>
+      /// <param name="userName">Username as part of needed credential for access</param>
+      /// <param name="password">Password as part of needed credential for access</param>
+      /// <param name="domain">Domain as part of needed credential for access</param>
+      public VCenterCommunicator(String hostName, String userName, String password, String domain) {
+         //Fetch information and collect them in a representative object:
+         //ServiceContent vcon =
+         vSphereClient.Connect("https://" + hostName + "/sdk");
+         if (!String.IsNullOrEmpty(domain)) userName = domain + "\\" + userName;
+         //UserSession vus = 
+         vSphereClient.Login(userName, password);
+      }
+      public void Dispose() {
+         try {
+            vSphereClient.Logout();
+            vSphereClient.Disconnect();
+         }
+         catch {
+            //Do nothing
+         }
+      }
+
       /// <summary>
       ///  Fetches all vmware guests, optionally filtered.
       /// </summary>
@@ -22,7 +46,7 @@ namespace VMWareChatter {
       /// <param name="password">Password as part of needed credential for access</param>
       /// <param name="domain">Domain as part of needed credential for access</param>
       /// <param name="guestNameFilter">Name of guest that you want to fetch information about</param>
-		public VmGuests GetVMServerInfo(String hostName, String userName, String password, String domain, String guestNameFilter) {
+      public VmGuests GetVMServerInfo(String guestNameFilter) {
 			VmGuests guests = new VmGuests();
 
 			//For debugging we don't want to talk to any vCenter, we will create our own data to work with:
@@ -128,15 +152,10 @@ namespace VMWareChatter {
 					}
 				};
 			} else {
-				//Fetch information and collect them in a representative object:
-            //ServiceContent vcon =
-            vcli.Connect("https://" + hostName + "/sdk");
-				if (!String.IsNullOrEmpty(domain)) userName = domain + "\\" + userName;
-				//UserSession vus = 
-            vcli.Login(userName, password);
+            //Fetch information and collect them in a representative object:
 				var filter = new NameValueCollection();
 				filter.Add("name", guestNameFilter);
-				IList<EntityViewBase> vms = vcli.FindEntityViews(typeof(VirtualMachine), null, filter, null);
+				IList<EntityViewBase> vms = vSphereClient.FindEntityViews(typeof(VirtualMachine), null, filter, null);
 				foreach (VMware.Vim.EntityViewBase tmp in vms) {            
 					VMware.Vim.VirtualMachine vm = (VirtualMachine)tmp;
 					VmGuest currentGuest = new VmGuest((vm.Guest.HostName != null ? (String)vm.Guest.HostName : ""));
@@ -149,7 +168,7 @@ namespace VMWareChatter {
 					currentGuest.OSFamily = (!String.IsNullOrEmpty(vm.Guest.GuestFamily) ? vm.Guest.GuestFamily : "");
 					guests.AddNode(currentGuest);
 				}
-				vcli.Disconnect();
+            vSphereClient.Disconnect();
 			}
          if (!String.IsNullOrEmpty(guestNameFilter)) {
             var newGuests = guests.Nodes.Where(x => x.Name.Equals(guestNameFilter)).ToList();
@@ -173,5 +192,169 @@ namespace VMWareChatter {
 			}
 			return ourToList;
 		}
-	}
+      public int GetVMNumMksConnections(String guestNameFilter) {
+         var filter = new NameValueCollection();
+         filter.Add("name", guestNameFilter);
+         VirtualMachine vm = null;
+         try {
+            vm = (VirtualMachine)vSphereClient.FindEntityView(typeof(VirtualMachine), null, filter, null);
+         }
+         catch {
+            //Do nothing
+         }
+         return vm != null ? vm.Summary.Runtime.NumMksConnections : 0;
+      }
+
+      /// <summary>
+      ///  Gets information to start a VMRC session to virtual machines
+      /// </summary>
+      /// <param name="guestNameFilter">Name of guest that you want to fetch information about</param>
+      public OrderedDictionary GetVMRCLogonInfo(String guestNameFilter, string userName) {
+         OrderedDictionary LogonInfoDictionary = new OrderedDictionary();
+         var filter = new NameValueCollection();
+         filter.Add("name", guestNameFilter);
+         IList<EntityViewBase> vms = vSphereClient.FindEntityViews(typeof(VirtualMachine), null, filter, null);
+
+         foreach (VMware.Vim.EntityViewBase tmp in vms) {
+            VirtualMachine vm = (VirtualMachine)tmp;
+            string vmkid = vm.Summary.Vm.Value;
+            string vmName = vm.Name;
+            int numConnections = vm.Summary.Runtime.NumMksConnections;
+            string cloneTicket = GetCloneTicket();
+            SessionManagerLocalTicket localTicket = null;
+            try {
+               localTicket = GetLocalTicket(userName);
+            }
+            catch (Exception e) {
+               throw (e);
+            }
+            LogonInfoDictionary.Add(vmName, new VmrcLogonInfo() { VmkID = vmkid, LocalTicket = localTicket, CloneTicket = cloneTicket, ConsoleConnections = numConnections });
+         }
+         return LogonInfoDictionary;
+      }
+      private LicenseManager GetLicenseManager() {
+         LicenseManager licenseManager = null;
+         try {
+            ManagedObjectReference _svcRef = new ManagedObjectReference();
+            _svcRef.Type = "ServiceInstance";
+            _svcRef.Value = "ServiceInstance";
+
+            ServiceInstance _service = new ServiceInstance(vSphereClient, _svcRef);
+
+            ServiceContent _sic = _service.RetrieveServiceContent();
+            licenseManager = (LicenseManager)vSphereClient.GetView(_sic.LicenseManager, null);
+         }
+         catch (Exception e) {
+            throw (e);
+         }
+         return licenseManager;
+      }
+      private SessionManager GetSessionManager() {
+         SessionManager sessionManager = null;
+         try {
+            ManagedObjectReference _svcRef = new ManagedObjectReference() { Type = "ServiceInstance", Value = "ServiceInstance" };
+            ServiceInstance _service = new ServiceInstance(vSphereClient, _svcRef);
+
+            ServiceContent _sic = _service.RetrieveServiceContent();
+            sessionManager = (SessionManager)vSphereClient.GetView(_sic.SessionManager, null);
+         }
+         catch (Exception e) {
+            throw (e);
+         }
+         return sessionManager;
+      }
+      /// <summary>
+      /// Get a list of all hosts
+      /// </summary>
+      /// <returns>List of all ESXi hosts</returns>
+      public List<HostSystem> GetHostSystems() {
+         List<HostSystem> hostSystems = new List<HostSystem>();
+         try {
+            Datacenter dataCenter = (Datacenter)vSphereClient.FindEntityView(typeof(Datacenter), null, null, null);
+            Folder folder = (Folder)vSphereClient.GetView(dataCenter.HostFolder, null);
+            foreach (ManagedObjectReference mObjR in folder.ChildEntity.Where(x => x.Type == "ComputeResource")) {
+               ComputeResource computeResource = (ComputeResource)vSphereClient.GetView(mObjR, null);
+               foreach (ManagedObjectReference hostRef in computeResource.Host) {
+                  hostSystems.Add((HostSystem)vSphereClient.GetView(hostRef, null));
+               }
+            }
+         }
+         catch (Exception e) {
+            throw (e);
+         }
+         return hostSystems;
+      }
+      /// <summary>
+      /// Check if a license feature is present. 
+      /// Error: QuerySupportedFeatures will most likely return: The operation is not supported on the object
+      /// </summary>
+      /// <param name="featureName">Name of the feature</param>
+      /// <param name="hostName">Hostname where to check</param>
+      /// <returns>True or false</returns>
+      public bool CheckLicenseFeature(string featureName, string hostName = "") {
+         HostSystem host = null;
+         if (String.IsNullOrEmpty(hostName)) {
+            host = GetHostSystems().FirstOrDefault();
+         }
+         else {
+            host = GetHostSystems().Where(_host => _host.Name == hostName).FirstOrDefault();
+         }
+         if (host != null) {
+            LicenseFeatureInfo lfInfo = GetLicenseManager().QuerySupportedFeatures(host.MoRef).Where(x => x.FeatureName == featureName).FirstOrDefault();
+            if (lfInfo != null) {
+               return true;
+            }
+         }
+         return false; ;
+      }
+      /// <summary>
+      /// Update the license where the client is connected
+      /// </summary>
+      /// <param name="license">License as string</param>
+      /// <returns></returns>
+      public bool UpdateLicense(string license) {
+         KeyValue DummyKey = new KeyValue() { Key = "DummyKey", Value = "DummyValue" };
+         KeyValue[] DummyArray = new KeyValue[1] { DummyKey };
+         LicenseManagerLicenseInfo lInfo = GetLicenseManager().UpdateLicense(license, DummyArray);
+         if (lInfo == null) return false;
+         return lInfo.LicenseKey.ToUpper() == license.ToUpper();
+      }
+      /// <summary>
+      /// Gets a clone ticket to use for one time authentication
+      /// </summary>
+      /// <returns></returns>
+      public string GetCloneTicket() {
+         return GetSessionManager().AcquireCloneTicket();
+      }
+      /// <summary>
+      /// Get a local ticket. It will be created on the host and won't be available to us.
+      /// You can find it under /var/run/vmware-hostd-ticket/ for a few seconds, it contains the password.
+      /// </summary>
+      /// <param name="userName">Username to create a one time ticket for</param>
+      /// <returns>One time ticket object</returns>
+      public SessionManagerLocalTicket GetLocalTicket(string userName) {
+         return GetSessionManager().AcquireLocalTicket(userName);
+      }
+      /// <summary>
+      /// Disconnect all sessions that are running where the clint is connected.
+      /// </summary>
+      public void DisconnectAllSessions() {
+         SessionManager sessionManager = GetSessionManager();
+         string[] sessionId = sessionManager.SessionList.Where(x => x.Key != sessionManager.CurrentSession.Key).Select(key => key.Key).ToArray();
+         try {
+            sessionManager.TerminateSession(sessionId);
+         }
+         catch (Exception e) {
+            if (e.Message.ToLower() != "a specified parameter was not correct") {
+               throw (e);
+            }
+         }
+      }
+   }
+   public class VmrcLogonInfo {
+      public string VmkID { get; set; }
+      public SessionManagerLocalTicket LocalTicket { get; set; }
+      public string CloneTicket { get; set; }
+      public int ConsoleConnections { get; set; }
+   }
 }
