@@ -204,7 +204,37 @@ namespace VMWareChatter {
          }
          return vm != null ? vm.Summary.Runtime.NumMksConnections : 0;
       }
-
+      /// <summary>
+      /// Sets a new powerstate
+      /// </summary>
+      /// <param name="guestNameFilter">The guest to power on or off</param>
+      /// <param name="powerState">True to power on, false to power off</param>
+      public void SetVMPowerState(String guestNameFilter, bool powerState) {
+         var filter = new NameValueCollection();
+         filter.Add("name", guestNameFilter);
+         VirtualMachine vm = null;
+         try {
+            vm = (VirtualMachine)vSphereClient.FindEntityView(typeof(VirtualMachine), null, filter, null);
+         }
+         catch {
+            //Do nothing
+         }
+         try {
+            if (powerState) {
+               HostSystem host = GetHostSystems().FirstOrDefault();
+               if (host != null) {
+                  vm.PowerOnVM_Task(host.MoRef);
+               }
+            }
+            else {
+               vm.PowerOffVM();
+            }
+         }
+         catch (Exception e) {
+            //Do nothing
+            //This code will no work unless we have write access to the vSphere API
+         }
+      }
       /// <summary>
       ///  Gets information to start a VMRC session to virtual machines
       /// </summary>
@@ -232,16 +262,15 @@ namespace VMWareChatter {
          }
          return LogonInfoDictionary;
       }
+      private ServiceInstance GetServiceInctance() {
+         ManagedObjectReference _svcRef = new ManagedObjectReference() { Type = "ServiceInstance", Value = "ServiceInstance" };
+         ServiceInstance _service = new ServiceInstance(vSphereClient, _svcRef);
+         return _service;
+      }
       private LicenseManager GetLicenseManager() {
          LicenseManager licenseManager = null;
          try {
-            ManagedObjectReference _svcRef = new ManagedObjectReference();
-            _svcRef.Type = "ServiceInstance";
-            _svcRef.Value = "ServiceInstance";
-
-            ServiceInstance _service = new ServiceInstance(vSphereClient, _svcRef);
-
-            ServiceContent _sic = _service.RetrieveServiceContent();
+            ServiceContent _sic = GetServiceInctance().RetrieveServiceContent();
             licenseManager = (LicenseManager)vSphereClient.GetView(_sic.LicenseManager, null);
          }
          catch (Exception e) {
@@ -252,10 +281,7 @@ namespace VMWareChatter {
       private SessionManager GetSessionManager() {
          SessionManager sessionManager = null;
          try {
-            ManagedObjectReference _svcRef = new ManagedObjectReference() { Type = "ServiceInstance", Value = "ServiceInstance" };
-            ServiceInstance _service = new ServiceInstance(vSphereClient, _svcRef);
-
-            ServiceContent _sic = _service.RetrieveServiceContent();
+            ServiceContent _sic = GetServiceInctance().RetrieveServiceContent();
             sessionManager = (SessionManager)vSphereClient.GetView(_sic.SessionManager, null);
          }
          catch (Exception e) {
@@ -286,24 +312,13 @@ namespace VMWareChatter {
       }
       /// <summary>
       /// Check if a license feature is present. 
-      /// Error: QuerySupportedFeatures will most likely return: The operation is not supported on the object
       /// </summary>
       /// <param name="featureName">Name of the feature</param>
-      /// <param name="hostName">Hostname where to check</param>
       /// <returns>True or false</returns>
-      public bool CheckLicenseFeature(string featureName, string hostName = "") {
-         HostSystem host = null;
-         if (String.IsNullOrEmpty(hostName)) {
-            host = GetHostSystems().FirstOrDefault();
-         }
-         else {
-            host = GetHostSystems().Where(_host => _host.Name == hostName).FirstOrDefault();
-         }
-         if (host != null) {
-            LicenseFeatureInfo lfInfo = GetLicenseManager().QuerySupportedFeatures(host.MoRef).Where(x => x.FeatureName == featureName).FirstOrDefault();
-            if (lfInfo != null) {
-               return true;
-            }
+      public bool CheckLicenseFeature(string featureName) {
+         List<KeyValue> keyValueList = GetLicenseManager().Licenses[0].Properties.Where(x => x.Key == "feature").Select(x => x.Value).ToList().Cast<KeyValue>().ToList().Where(keyValue => keyValue.Value.ToString().ToLower() == featureName.ToLower()).ToList();
+         if (keyValueList != null && keyValueList.Count > 0) {
+            return true;
          }
          return false; ;
       }
