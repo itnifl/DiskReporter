@@ -15,6 +15,7 @@ For the full functionality of the code, the following prerequisites must be in o
 	2. Configuration files 
 	3. TSM AdminClient(if you are not running in Debug mode)
 	4. [Kraggs.TSM.Utils](https://github.com/raggsokk/Kraggs.TSM.Utils)
+	5. Reference compiled dlls from [VMwareChatter] (https://github.com/itnifl/VMwareChatter)
 	
 Also NUnit with Monodevelop is being used, I have no experience if it might work or not out of the box if you are using some other IDE.
 In Visual Studio this can be fixed using Nuget and the command: Install-Package NUnit -Version 2.6.4

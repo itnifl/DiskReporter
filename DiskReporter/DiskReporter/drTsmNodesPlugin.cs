@@ -7,7 +7,7 @@ using System.Linq;
 using Kraggs.TSM;
 using Kraggs.TSM.Utils;
 using DiskReporter.PluginContracts;
-using VMWareChatter.XmlReader;
+using DiskReporter.Utilities;
 
 namespace DiskReporter {
    class TsmNodes : IComNodeList<TsmNode> {

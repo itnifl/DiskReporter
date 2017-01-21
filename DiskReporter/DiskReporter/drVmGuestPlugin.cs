@@ -4,8 +4,9 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using DiskReporter.PluginContracts;
+using DiskReporter.Utilities;
 using VMWareChatter;
-using VMWareChatter.XmlReader;
+using System.Security;
 
 namespace DiskReporter {
    public class VmGuests : IComNodeList<VmGuest> {
@@ -19,6 +20,12 @@ namespace DiskReporter {
                yield return guest;
             }
          }        
+      }
+      public VmGuests(List<VirtualMachineWrapper> wrapperList) {
+         this.Nodes = new List<VmGuest>();
+         wrapperList.ForEach((VirtualMachineWrapper vm) => {
+            this.Nodes.Add(new VmGuest(vm));
+         });         
       }
       public VmGuests() {
          this.Nodes = new List<VmGuest>();
@@ -72,6 +79,18 @@ namespace DiskReporter {
       public long? TotalStorage { get; set; }
       public long? TotalSystemStorage { get; set; }
 
+      public VmGuest(VMWareChatter.VirtualMachineWrapper vm) {
+         this.Name = vm.HostName;
+         foreach (GuestDiskInfoWrapper disk in vm.Disk) {
+            if (this.Disks == null) {
+               this.Disks = new List<GeneralDisk>();
+            }
+            this.Disks.Add(new GeneralDisk(disk));
+         }         
+         this.IP = vm.IpAddress;
+         this.PowerStatus = vm.PowerState.ToString();
+         this.ToolsStatus = vm.ToolsRunningStatus;
+      }
       public VmGuest() {
          this.Name = "Noname";
       }
@@ -145,22 +164,28 @@ namespace DiskReporter {
 		public T1 GetAllNodesData<T1, T2>(string sourceConfigFileName, string nameFilter, out List<Exception> outExceptions) where T1 : IComNodeList<T2>, new() 
 			where T2 : IComNode, new()
 		{
-         VCenterCommunicator vCom = new VCenterCommunicator ();
+         vCenterCommunicator vCom = null;
          XmlReaderLocal vmConfigReader = new XmlReaderLocal(sourceConfigFileName);
          List<Hashtable> hashtableList = vmConfigReader.ReadAllServers();
          List<Exception> loopExceptions = new List<Exception>();
-         VmGuests ourGuests = new VmGuests();
+         VmGuests ourGuests = null;
          T1 returnGuests = new T1();
 
          foreach (Hashtable htable in hashtableList) {
             string host = (string)htable["VCENTER"];
             string domain = (string)htable["DOMAIN"];
             string username = (string)htable["USER"];
-            string password = (string)htable["PASSWORD"];
 
-	        	try {
-					ourGuests = vCom.GetVMServerInfo(host, username, password, domain, nameFilter);
-	        	} catch (Exception e) {
+            SecureString securePass = new SecureString();
+            foreach (char c in (string)htable["PASSWORD"]) {
+               securePass.AppendChar(c);
+            }
+
+            vCom = new vCenterCommunicator(host, username, securePass, domain);
+
+            try {
+					ourGuests = new VmGuests(vCom.GetVirtualMachines(nameFilter));
+            } catch (Exception e) {
 					loopExceptions.Add(e);
 	        	}
 				returnGuests.Nodes = new List<T2>();

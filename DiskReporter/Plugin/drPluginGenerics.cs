@@ -1,5 +1,5 @@
 using System;
-
+using VMWareChatter;
 namespace DiskReporter {
     /// <summary>
     ///  This is the class we use to represent a disk for all plugins
@@ -12,6 +12,12 @@ namespace DiskReporter {
             this.LAST_BACKUP_END = last_backup_end;
             this.FreeSpace = (long)(capacity * (pct_util / 100));
         }
+         public GeneralDisk(GuestDiskInfoWrapper dw) {
+            this.DiskPath = dw.DiskPath;
+            this.Capacity = dw.Capacity;
+            this.PCT_UTIL = Convert.ToInt64((double)(1 - ((double)dw.FreeSpace / (double)dw.Capacity)) * 100);
+            this.FreeSpace = dw.FreeSpace;
+         }
         public GeneralDisk() {
             this.LAST_BACKUP_END = DateTime.Today; //This is the default, marks the disks and its data as current. Maybe confusing for VMware servers where there is no backup informatiin.
         }

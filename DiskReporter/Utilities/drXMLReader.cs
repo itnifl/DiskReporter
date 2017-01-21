@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using System.Collections;
 using System.Xml;
 
-namespace VMWareChatter.XmlReader {
+namespace DiskReporter.Utilities {
    public class AttributeCollection {
       public String NodeName { get; set; }
-      public Dictionary<string, string> Attributes { get; set;}
+      public Dictionary<string, string> Attributes { get; set; }
 
       public AttributeCollection(string nodeName) {
          this.NodeName = nodeName;
@@ -25,7 +28,7 @@ namespace VMWareChatter.XmlReader {
       public AttributeCollection ReadFirstNodeAttributes(String nodename) {
          reader = new XmlTextReader(xmlFil);
          AttributeCollection attrCollection = new AttributeCollection(reader.Name);
-         while (reader.Read()) {            
+         while (reader.Read()) {
             switch (reader.NodeType) {
                case XmlNodeType.Element:
                   if (reader.Name.ToString() == nodename) {
@@ -34,9 +37,9 @@ namespace VMWareChatter.XmlReader {
                         while (reader.MoveToNextAttribute()) {
                            attrCollection.Attributes.Add(reader.Name, reader.Value);
                         }
-                        reader.MoveToElement();                        
-                        reader.Close();                        
-                     }                     
+                        reader.MoveToElement();
+                        reader.Close();
+                     }
                   }
                   break;
                case XmlNodeType.Text:
@@ -68,7 +71,7 @@ namespace VMWareChatter.XmlReader {
                case XmlNodeType.EndElement:
                   break;
             }
-         }         
+         }
          return null;
       }
       /// <summary>
@@ -130,36 +133,36 @@ namespace VMWareChatter.XmlReader {
          reader.Dispose();
          return hashtableList;
       }
-		/// <summary>
-		///  Read all servers disdinguished by the SENDER nodes
-		/// </summary>
-		public List<Hashtable> ReadAllMailSenders() {
-			Hashtable hashtable = new Hashtable();
-			List<Hashtable> hashtableList = new List<Hashtable>();
-			String currentNode = "";
-			Boolean serverStart = false;
-			reader = new XmlTextReader(xmlFil);
-			while (reader.Read()) {
-				switch (reader.NodeType) {
-					case XmlNodeType.Element:
-						if (reader.Name.ToString() == "SENDER") serverStart = true;
-						if (serverStart == true) currentNode = reader.Name.ToString();
-						break;
-						case XmlNodeType.Text:
-						if (serverStart == true) hashtable.Add(currentNode, reader.Value.ToString());
-						break;
-						case XmlNodeType.EndElement:
-						if (reader.Name.ToString() == "SENDER") {
-							serverStart = false;
-							hashtableList.Add(new Hashtable(hashtable));
-							hashtable.Clear();
-						}
-						break;
-				}
-			}
-			reader.Close();
-			reader.Dispose();
-			return hashtableList;
-		}
+      /// <summary>
+      ///  Read all servers disdinguished by the SENDER nodes
+      /// </summary>
+      public List<Hashtable> ReadAllMailSenders() {
+         Hashtable hashtable = new Hashtable();
+         List<Hashtable> hashtableList = new List<Hashtable>();
+         String currentNode = "";
+         Boolean serverStart = false;
+         reader = new XmlTextReader(xmlFil);
+         while (reader.Read()) {
+            switch (reader.NodeType) {
+               case XmlNodeType.Element:
+                  if (reader.Name.ToString() == "SENDER") serverStart = true;
+                  if (serverStart == true) currentNode = reader.Name.ToString();
+                  break;
+               case XmlNodeType.Text:
+                  if (serverStart == true) hashtable.Add(currentNode, reader.Value.ToString());
+                  break;
+               case XmlNodeType.EndElement:
+                  if (reader.Name.ToString() == "SENDER") {
+                     serverStart = false;
+                     hashtableList.Add(new Hashtable(hashtable));
+                     hashtable.Clear();
+                  }
+                  break;
+            }
+         }
+         reader.Close();
+         reader.Dispose();
+         return hashtableList;
+      }
    }
 }

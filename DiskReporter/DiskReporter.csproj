@@ -40,8 +40,8 @@
     <StartupObject>DiskReporter.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="nunit.framework, Version=3.0.5813.39031, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
-      <HintPath>..\packages\NUnit.3.0.1\lib\net45\nunit.framework.dll</HintPath>
+    <Reference Include="nunit.framework, Version=3.6.0.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
+      <HintPath>..\packages\NUnit.3.6.0\lib\net45\nunit.framework.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -65,6 +65,9 @@
       <HintPath>..\config&amp;Dependencies\NPOI.dll</HintPath>
     </Reference>
     <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="VMWareChatter">
+      <HintPath>..\config&amp;Dependencies\VMWareChatter.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DiskReporter\drNodeEdgeIntegration.cs" />
@@ -82,11 +85,11 @@
     <Compile Include="Utilities\drInputArguments.cs" />
     <Compile Include="Utilities\drMailMessage.cs" />
     <Compile Include="Utilities\drRegexUtilities.cs" />
+    <Compile Include="Utilities\drXMLReader.cs" />
     <Compile Include="Utilities\ExcelMagic\emCreateExcelDoc.cs" />
+    <None Include="packages.config" />
     <None Include="Utilities\ExcelMagic\emCreateExcelMSDoc.cs" />
     <Compile Include="Utilities\ExcelMagic\emExcelDoc.cs" />
-    <Compile Include="VmwareChatter\vcVMWareChatter.cs" />
-    <Compile Include="VmwareChatter\vcXmlReader.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
@@ -96,9 +99,6 @@
   <Target Name="AfterBuild">
   </Target>
   -->
-  <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
   <PropertyGroup>
     <PostBuildEvent>
     </PostBuildEvent>

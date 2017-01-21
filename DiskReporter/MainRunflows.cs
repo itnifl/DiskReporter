@@ -6,7 +6,6 @@ using System.IO;
 using System.Reflection;
 using DiskReporter.Utilities.ExcelMagic;
 using DiskReporter.Utilities;
-using VMWareChatter.XmlReader;
 
 namespace DiskReporter {
    /*public class WriteToEventLog { 
